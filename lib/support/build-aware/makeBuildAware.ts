@@ -44,7 +44,8 @@ export const makeBuildAware: CodeTransformRegistrationDecorator<any> =
             } else {
                 // No edit mode was set explicitly. We need to set one that sets a branch:
                 // No PR for now
-                const branch = (ci.parameters as TransformModeSuggestion).desiredBranchName || `${ctr.name}-${Date.now()}`;
+                const branch =
+                    (ci.parameters as TransformModeSuggestion).desiredBranchName || `${ctr.name}-${Date.now()}`;
                 const desiredCommitMessage = (ci.parameters as TransformModeSuggestion).desiredCommitMessage
                     || dryRunMessage(ctr.description || ctr.name);
                 return {
