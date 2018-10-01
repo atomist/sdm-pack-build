@@ -39,7 +39,7 @@ import {
     postWebhook,
     readSdmVersion,
 } from "@atomist/sdm-core";
-import { SdmBuildIdentifierForRepo } from "@atomist/sdm-core/lib/typings/types";
+import { SdmBuildIdentifierForRepo } from "../../typings/types";
 import SdmBuildIdentifier = SdmBuildIdentifierForRepo.SdmBuildIdentifier;
 
 /**
