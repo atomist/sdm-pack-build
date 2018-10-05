@@ -42,7 +42,6 @@ export class Artifact extends FulfillableGoalWithRegistrations<ArtifactRegistrat
         }, ...dependsOn);
     }
 
-
     public with(registration: ArtifactRegistration): this {
         const fulfillment: SideEffect = { name: "build" };
         this.addFulfillment(fulfillment);
@@ -53,4 +52,3 @@ export class Artifact extends FulfillableGoalWithRegistrations<ArtifactRegistrat
         return this;
     }
 }
-
