@@ -62,16 +62,17 @@ export class Artifact extends FulfillableGoalWithRegistrations<ArtifactRegistrat
         this.sdm.addEvent({
             name: "FindOnArtifactImageLinked",
             subscription: subscription("OnImageLinked"),
-            listener: this.handle,
+            listener: (event, context) => this.handle(event, context, this),
         });
     }
 
     private async handle(event: EventFired<OnImageLinked.Subscription>,
-                         context: HandlerContext): Promise<HandlerResult> {
+                         context: HandlerContext,
+                         goal: Artifact): Promise<HandlerResult> {
         const imageLinked = event.data.ImageLinked[0];
         const commit = imageLinked.commit;
         const image = imageLinked.image;
-        const id = this.sdm.configuration.sdm.repoRefResolver.toRemoteRepoRef(
+        const id = goal.sdm.configuration.sdm.repoRefResolver.toRemoteRepoRef(
             commit.repo,
             {
                 sha: commit.sha,
@@ -84,20 +85,20 @@ export class Artifact extends FulfillableGoalWithRegistrations<ArtifactRegistrat
             commit.repo.org.provider.providerId,
             this);
         if (!artifactSdmGoal) {
-            logger.debug("Context %s not found for %j", this.context, id);
+            logger.debug("Context %s not found for %j", goal.context, id);
             return Success;
         }
 
-        if (this.registrations.length > 0) {
-            const credentials = this.sdm.configuration.sdm.credentialsResolver.eventHandlerCredentials(context, id);
+        if (goal.registrations.length > 0) {
+            const credentials = goal.sdm.configuration.sdm.credentialsResolver.eventHandlerCredentials(context, id);
             logger.info("Scanning artifact for %j", id);
-            const deployableArtifact = await this.sdm.configuration.sdm.artifactStore.checkout(
+            const deployableArtifact = await goal.sdm.configuration.sdm.artifactStore.checkout(
                 image.imageName,
                 id,
                 credentials);
             const addressChannels = addressChannelsFor(commit.repo, context);
 
-            await this.sdm.configuration.sdm.projectLoader.doWithProject({
+            await goal.sdm.configuration.sdm.projectLoader.doWithProject({
                 credentials,
                 id,
                 context,
@@ -119,9 +120,9 @@ export class Artifact extends FulfillableGoalWithRegistrations<ArtifactRegistrat
                     deployableArtifact,
                     credentials,
                 };
-                if (!!this.registrations) {
-                    const listeners = this.registrations.length > 0 ?
-                        _.flatten(this.registrations.map(r => !!r.listeners ? r.listeners : [])) :
+                if (!!goal.registrations) {
+                    const listeners = goal.registrations.length > 0 ?
+                        _.flatten(goal.registrations.map(r => !!r.listeners ? r.listeners : [])) :
                         [];
                     logger.info("About to invoke %d ArtifactListener registrations", listeners.length);
 
@@ -136,7 +137,7 @@ export class Artifact extends FulfillableGoalWithRegistrations<ArtifactRegistrat
 
         await updateGoal(context, artifactSdmGoal, {
             state: SdmGoalState.success,
-            description: this.successDescription,
+            description: goal.successDescription,
             externalUrl: image.imageName,
         });
         logger.info("Updated artifact goal '%s'", artifactSdmGoal.name);
