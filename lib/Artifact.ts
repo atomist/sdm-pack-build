@@ -16,16 +16,21 @@
 
 import {
     ArtifactGoal,
+    ArtifactListenerRegisterable,
     DefaultGoalNameGenerator,
-    FulfillableGoal,
     FulfillableGoalDetails,
+    FulfillableGoalWithRegistrations,
     getGoalDefinitionFrom,
     Goal,
     SideEffect,
 } from "@atomist/sdm";
 import { FindArtifactOnImageLinked } from "./support/artifact/FindArtifactOnImageLinked";
 
-export class Artifact extends FulfillableGoal {
+export interface ArtifactRegistration {
+    listeners: ArtifactListenerRegisterable[];
+}
+
+export class Artifact extends FulfillableGoalWithRegistrations<ArtifactRegistration> {
     constructor(goalDetailsOrUniqueName: FulfillableGoalDetails | string
                     = DefaultGoalNameGenerator.generateName("artifact"),
                 ...dependsOn: Goal[]) {
@@ -35,13 +40,17 @@ export class Artifact extends FulfillableGoal {
             ...getGoalDefinitionFrom(goalDetailsOrUniqueName, DefaultGoalNameGenerator.generateName("artifact")),
             displayName: "artifact",
         }, ...dependsOn);
+    }
 
+
+    public with(registration: ArtifactRegistration): this {
         const fulfillment: SideEffect = { name: "build" };
         this.addFulfillment(fulfillment);
         this.sdm.eventHandlers.push(() => new FindArtifactOnImageLinked(
             this,
-            this.sdm.artifactListenerRegistrations,
+            registration.listeners,
             this.sdm.configuration.sdm));
+        return this;
     }
 }
 
