@@ -21,6 +21,7 @@ import {
     FulfillableGoalDetails,
     getGoalDefinitionFrom,
     Goal,
+    SideEffect,
 } from "@atomist/sdm";
 
 export class Artifact extends FulfillableGoal {
@@ -33,5 +34,9 @@ export class Artifact extends FulfillableGoal {
             ...getGoalDefinitionFrom(goalDetailsOrUniqueName, DefaultGoalNameGenerator.generateName("artifact")),
             displayName: "artifact",
         }, ...dependsOn);
+
+        this.addFulfillment({
+            name: "build",
+        } as SideEffect);
     }
 }
