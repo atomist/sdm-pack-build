@@ -35,8 +35,7 @@ export class Artifact extends FulfillableGoal {
             displayName: "artifact",
         }, ...dependsOn);
 
-        this.addFulfillment({
-            name: "build",
-        } as SideEffect);
+        const fulfillment: SideEffect = { name: "build" };
+        this.addFulfillment(fulfillment);
     }
 }
