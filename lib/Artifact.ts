@@ -23,6 +23,7 @@ import {
     Goal,
     SideEffect,
 } from "@atomist/sdm";
+import { FindArtifactOnImageLinked } from "./support/artifact/FindArtifactOnImageLinked";
 
 export class Artifact extends FulfillableGoal {
     constructor(goalDetailsOrUniqueName: FulfillableGoalDetails | string
@@ -37,5 +38,10 @@ export class Artifact extends FulfillableGoal {
 
         const fulfillment: SideEffect = { name: "build" };
         this.addFulfillment(fulfillment);
+        this.sdm.eventHandlers.push(() => new FindArtifactOnImageLinked(
+            this,
+            this.sdm.artifactListenerRegistrations,
+            this.sdm.configuration.sdm));
     }
 }
+
