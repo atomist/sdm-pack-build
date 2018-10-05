@@ -16,11 +16,11 @@
 
 import {
     EventFired,
+    GraphQL,
     HandlerContext,
     HandlerResult,
     Success,
 } from "@atomist/automation-client";
-import { subscription } from "@atomist/automation-client/lib/graph/graphQL";
 import {
     addressChannelsFor,
     ArtifactGoal,
@@ -48,7 +48,7 @@ export interface ArtifactRegistration {
 }
 
 /**
- * This goal is fulfilled by a OnImageLinked event subscription. The Build goal will
+ * This goal is fulfilled by an OnImageLinked event subscription. The Build goal will
  * cause such an event being emitted, but external CI systems can trigger the goal
  * fulfillment as well. On fulfillment, the external URL for the artifact will be
  * put on the goal instance and shown in the client.
@@ -75,7 +75,7 @@ export class Artifact extends FulfillableGoalWithRegistrations<ArtifactRegistrat
         super.register(sdm);
         sdm.addEvent({
             name: `${this.definition.uniqueName}-OnImageLinkedHandler`,
-            subscription: subscription("OnImageLinked"),
+            subscription: GraphQL.subscription("OnImageLinked"),
             listener: (event, context) => this.handle(event, context, this),
         });
     }
