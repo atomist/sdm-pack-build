@@ -188,6 +188,7 @@ async function linkArtifact(gi: GoalInvocation,
                             rb: BuildInProgress): Promise<void> {
     const { configuration, credentials, sdmGoal } = gi;
     const imageUrl = await configuration.sdm.artifactStore.storeFile(rb.appInfo, rb.deploymentUnitFile, credentials);
+    gi.sdmGoal.externalUrl = imageUrl;
     await postLinkImageWebhook(sdmGoal.repo.owner, sdmGoal.repo.name, sdmGoal.sha, imageUrl, gi.context.workspaceId);
 }
 
