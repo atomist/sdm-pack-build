@@ -36,6 +36,7 @@ import {
     PushListenerInvocation,
     SdmGoalState,
     SideEffect,
+    SoftwareDeliveryMachine,
     toArtifactListenerRegistration,
     updateGoal,
 } from "@atomist/sdm";
@@ -46,6 +47,15 @@ export interface ArtifactRegistration {
     listeners?: ArtifactListenerRegisterable[];
 }
 
+/**
+ * This goal is fulfilled by a OnImageLinked event subscription. The Build goal will
+ * cause such an event being emitted, but external CI systems can trigger the goal
+ * fulfillment as well. On fulfillment, the external URL for the artifact will be
+ * put on the goal instance and shown in the client.
+ *
+ * You can register listeners on this event to trigger when a new artifact is available
+ * through this goal.
+ */
 export class Artifact extends FulfillableGoalWithRegistrations<ArtifactRegistration> {
     constructor(goalDetailsOrUniqueName: FulfillableGoalDetails | string
                     = DefaultGoalNameGenerator.generateName("artifact"),
@@ -59,8 +69,12 @@ export class Artifact extends FulfillableGoalWithRegistrations<ArtifactRegistrat
 
         const fulfillment: SideEffect = {name: "build"};
         this.addFulfillment(fulfillment);
-        this.sdm.addEvent({
-            name: "FindOnArtifactImageLinked",
+    }
+
+    public register(sdm: SoftwareDeliveryMachine): void {
+        super.register(sdm);
+        sdm.addEvent({
+            name: `${this.definition.uniqueName}-OnImageLinkedHandler`,
             subscription: subscription("OnImageLinked"),
             listener: (event, context) => this.handle(event, context, this),
         });
@@ -85,7 +99,6 @@ export class Artifact extends FulfillableGoalWithRegistrations<ArtifactRegistrat
             commit.repo.org.provider.providerId,
             this);
         if (!artifactSdmGoal) {
-            logger.debug("Context %s not found for %j", goal.context, id);
             return Success;
         }
 
