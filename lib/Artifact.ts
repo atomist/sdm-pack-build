@@ -35,5 +35,3 @@ export class Artifact extends FulfillableGoal {
         }, ...dependsOn);
     }
 }
-
-
