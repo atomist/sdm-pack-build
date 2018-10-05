@@ -36,7 +36,7 @@ import {
     toArtifactListenerRegistration,
     updateGoal,
 } from "@atomist/sdm";
-import { OnImageLinked } from "@atomist/sdm-core/lib/typings/types";
+import { OnImageLinked } from "../../typings/types";
 
 @EventHandler("Scan when artifact is found", GraphQL.subscription("OnImageLinked"))
 export class FindArtifactOnImageLinked implements HandleEvent<OnImageLinked.Subscription> {
