@@ -43,7 +43,7 @@ import * as _ from "lodash";
 import { OnImageLinked } from "./typings/types";
 
 export interface ArtifactRegistration {
-    listeners: ArtifactListenerRegisterable[];
+    listeners?: ArtifactListenerRegisterable[];
 }
 
 export class Artifact extends FulfillableGoalWithRegistrations<ArtifactRegistration> {
@@ -62,13 +62,12 @@ export class Artifact extends FulfillableGoalWithRegistrations<ArtifactRegistrat
         this.sdm.addEvent({
             name: "FindOnArtifactImageLinked",
             subscription: subscription("OnImageLinked"),
-            listener: (event, context) => this.handle(event, context, this.registrations),
+            listener: this.handle,
         });
     }
 
     private async handle(event: EventFired<OnImageLinked.Subscription>,
-                         context: HandlerContext,
-                         registrations: ArtifactRegistration[]): Promise<HandlerResult> {
+                         context: HandlerContext): Promise<HandlerResult> {
         const imageLinked = event.data.ImageLinked[0];
         const commit = imageLinked.commit;
         const image = imageLinked.image;
@@ -89,7 +88,7 @@ export class Artifact extends FulfillableGoalWithRegistrations<ArtifactRegistrat
             return Success;
         }
 
-        if (registrations.length > 0) {
+        if (this.registrations.length > 0) {
             const credentials = this.sdm.configuration.sdm.credentialsResolver.eventHandlerCredentials(context, id);
             logger.info("Scanning artifact for %j", id);
             const deployableArtifact = await this.sdm.configuration.sdm.artifactStore.checkout(
@@ -120,14 +119,18 @@ export class Artifact extends FulfillableGoalWithRegistrations<ArtifactRegistrat
                     deployableArtifact,
                     credentials,
                 };
-                const listeners = _.flatten(registrations.map(r => r.listeners));
-                logger.info("About to invoke %d ArtifactListener registrations", listeners.length);
+                if (!!this.registrations) {
+                    const listeners = this.registrations.length > 0 ?
+                        _.flatten(this.registrations.map(r => !!r.listeners ? r.listeners : [])) :
+                        [];
+                    logger.info("About to invoke %d ArtifactListener registrations", listeners.length);
 
-                await Promise.all(
-                    listeners
-                    .map(toArtifactListenerRegistration)
-                    .filter(async arl => !arl.pushTest || !!(await arl.pushTest.mapping(pli)))
-                    .map(l => l.action(ai)));
+                    await Promise.all(
+                        listeners
+                            .map(toArtifactListenerRegistration)
+                            .filter(async arl => !arl.pushTest || !!(await arl.pushTest.mapping(pli)))
+                            .map(l => l.action(ai)));
+                }
             });
         }
 
