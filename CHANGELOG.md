@@ -10,3 +10,4 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 
 -   Empty SDM pack structure.
+-   Artifact is now a typed goal. [#2](https://github.com/atomist/sdm-pack-build/issues/2)
