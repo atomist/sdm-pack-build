@@ -97,7 +97,7 @@ export class Artifact extends FulfillableGoalWithRegistrations<ArtifactRegistrat
             context,
             id,
             commit.repo.org.provider.providerId,
-            this);
+            goal);
         if (!artifactSdmGoal) {
             return Success;
         }

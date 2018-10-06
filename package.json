@@ -26,7 +26,8 @@
   "main": "./index.js",
   "types": "./index.d.ts",
   "dependencies": {
-    "lodash": "^4.17.11"
+    "lodash": "^4.17.11",
+    "json-stringify-safe": "^5.0.1"
   },
   "peerDependencies": {
     "@atomist/automation-client": "*",
