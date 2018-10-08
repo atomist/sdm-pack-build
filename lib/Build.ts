@@ -15,13 +15,13 @@
  */
 
 import {
-    BuildGoal,
     DefaultGoalNameGenerator,
     FulfillableGoalDetails,
     FulfillableGoalWithRegistrations,
     getGoalDefinitionFrom,
     Goal,
     ImplementationRegistration,
+    IndependentOfEnvironment,
 } from "@atomist/sdm";
 import {
     Builder,
@@ -60,3 +60,14 @@ export class Build extends FulfillableGoalWithRegistrations<BuilderRegistration>
         return this;
     }
 }
+
+const BuildGoal = new Goal({
+    uniqueName: "build",
+    environment: IndependentOfEnvironment,
+    displayName: "build",
+    workingDescription: "Building",
+    completedDescription: "Build successful",
+    failedDescription: "Build failed",
+    isolated: true,
+    retryFeasible: true,
+});
