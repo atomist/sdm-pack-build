@@ -73,12 +73,19 @@ export class Artifact extends FulfillableGoalWithRegistrations<ArtifactRegistrat
 
     public register(sdm: SoftwareDeliveryMachine): void {
         super.register(sdm);
+
+        function sanitizeForSubscriptionName(uniqueName: string): string {
+            return uniqueName.replace(/[.#:/]/, "");
+        }
+
         sdm.addEvent({
-            name: `${this.definition.uniqueName}-OnImageLinkedHandler`,
+            name: `${sanitizeForSubscriptionName(this.definition.uniqueName)}OnImageLinkedHandler`,
             subscription: GraphQL.subscription("OnImageLinked"),
             listener: (event, context) => this.handle(event, context, this),
         });
     }
+
+
 
     private async handle(event: EventFired<OnImageLinked.Subscription>,
                          context: HandlerContext,

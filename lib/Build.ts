@@ -103,8 +103,13 @@ export class Build
 
     public register(sdm: SoftwareDeliveryMachine): void {
         super.register(sdm);
+
+        function sanitizeForSubscriptionName(uniqueName: string): string {
+            return uniqueName.replace(/[.#:/]/, "");
+        }
+
         sdm.addEvent({
-            name: `${this.definition.uniqueName}-OnBuildComplete`,
+            name: `${sanitizeForSubscriptionName(this.definition.uniqueName)}OnBuildComplete`,
             subscription: GraphQL.subscription("OnBuildComplete"),
             listener: (event, context) => this.handleBuildCompleteEvent(event, context, this),
         });
