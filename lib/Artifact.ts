@@ -85,8 +85,6 @@ export class Artifact extends FulfillableGoalWithRegistrations<ArtifactRegistrat
         });
     }
 
-
-
     private async handle(event: EventFired<OnImageLinked.Subscription>,
                          context: HandlerContext,
                          goal: Artifact): Promise<HandlerResult> {
