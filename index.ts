@@ -15,8 +15,12 @@
  */
 
 export {
-    BuilderRegistration,
+    Artifact,
+    ArtifactRegistration,
+} from "./lib/Artifact";
+export {
     Build,
+    BuilderRegistration,
 } from "./lib/Build";
 export {
     Builder,

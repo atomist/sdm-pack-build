@@ -23,11 +23,10 @@ import {
     logger,
     RemoteRepoRef,
     Success,
-} from "@atomist/automation-client";
+ } from "@atomist/automation-client";
 import {
     AddressChannels,
     addressChannelsFor,
-    BuildGoal,
     BuildListener,
     BuildListenerInvocation,
     DefaultGoalNameGenerator,
@@ -39,6 +38,7 @@ import {
     Goal,
     Implementation,
     ImplementationRegistration,
+    IndependentOfEnvironment,
     LogInterpretation,
     reportFailureInterpretation,
     SdmGoalEvent,
@@ -208,3 +208,14 @@ function buildStatusToSdmGoalState(buildStatus: BuildStatus): SdmGoalState {
             return SdmGoalState.in_process;
     }
 }
+
+const BuildGoal = new Goal({
+    uniqueName: "build",
+    environment: IndependentOfEnvironment,
+    displayName: "build",
+    workingDescription: "Building",
+    completedDescription: "Build successful",
+    failedDescription: "Build failed",
+    isolated: true,
+    retryFeasible: true,
+});

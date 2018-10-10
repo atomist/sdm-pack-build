@@ -19,11 +19,11 @@ import {
     GraphQL,
     HandlerContext,
     HandlerResult,
+    logger,
     Success,
 } from "@atomist/automation-client";
 import {
     addressChannelsFor,
-    ArtifactGoal,
     ArtifactListenerInvocation,
     ArtifactListenerRegisterable,
     DefaultGoalNameGenerator,
@@ -32,7 +32,7 @@ import {
     FulfillableGoalWithRegistrations,
     getGoalDefinitionFrom,
     Goal,
-    logger,
+    IndependentOfEnvironment,
     PushListenerInvocation,
     SdmGoalState,
     SideEffect,
@@ -67,7 +67,7 @@ export class Artifact extends FulfillableGoalWithRegistrations<ArtifactRegistrat
             displayName: "artifact",
         }, ...dependsOn);
 
-        const fulfillment: SideEffect = {name: "build"};
+        const fulfillment: SideEffect = { name: "build" };
         this.addFulfillment(fulfillment);
     }
 
@@ -157,3 +157,10 @@ export class Artifact extends FulfillableGoalWithRegistrations<ArtifactRegistrat
         return Success;
     }
 }
+
+const ArtifactGoal = new Goal({
+    uniqueName: "artifact",
+    environment: IndependentOfEnvironment,
+    displayName: "store artifact",
+    completedDescription: "Stored artifact",
+});

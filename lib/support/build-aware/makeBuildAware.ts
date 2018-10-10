@@ -16,7 +16,7 @@
 
 import {
     EditMode,
-    isPullRequest,
+    editModes,
 } from "@atomist/automation-client";
 import {
     CodeTransformRegistration,
@@ -66,7 +66,7 @@ export const makeBuildAware: CodeTransformRegistrationDecorator<any> =
 function dryRunOf(em: EditMode): EditMode {
     // Add dry run message suffix
     em.message = dryRunMessage(em.message) + "\n\n" + BuildAwareMarker;
-    if (isPullRequest(em)) {
+    if (editModes.isPullRequest(em)) {
         // Don't let it raise a PR if it wanted to.
         // It will remain a valid BranchCommit if it was a PR
         em.title = em.body = undefined;
