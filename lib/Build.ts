@@ -21,7 +21,7 @@ import {
     HandlerResult,
     logger,
     Success,
- } from "@atomist/automation-client";
+} from "@atomist/automation-client";
 import {
     AddressChannels,
     addressChannelsFor,
