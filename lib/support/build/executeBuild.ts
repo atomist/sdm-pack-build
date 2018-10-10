@@ -20,6 +20,7 @@ import {
     configurationValue,
     failure,
     HandlerContext,
+    logger,
     ProjectOperationCredentials,
     QueryNoCacheOptions,
     RemoteRepoRef,
@@ -29,7 +30,6 @@ import {
     AppInfo,
     ExecuteGoal,
     GoalInvocation,
-    logger,
     SdmGoalEvent,
 } from "@atomist/sdm";
 import {

@@ -19,6 +19,7 @@ import {
     GraphQL,
     HandlerContext,
     HandlerResult,
+    logger,
     Success,
 } from "@atomist/automation-client";
 import {
@@ -32,7 +33,6 @@ import {
     getGoalDefinitionFrom,
     Goal,
     IndependentOfEnvironment,
-    logger,
     PushListenerInvocation,
     SdmGoalState,
     SideEffect,
