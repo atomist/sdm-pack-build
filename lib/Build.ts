@@ -23,7 +23,7 @@ import {
     logger,
     RemoteRepoRef,
     Success,
- } from "@atomist/automation-client";
+} from "@atomist/automation-client";
 import {
     AddressChannels,
     addressChannelsFor,
