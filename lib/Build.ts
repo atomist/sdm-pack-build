@@ -103,8 +103,10 @@ export class Build
 
     public register(sdm: SoftwareDeliveryMachine): void {
         super.register(sdm);
+
         sdm.addEvent({
-            name: `${this.definition.uniqueName}-OnBuildComplete`,
+            name: `OnBuildComplete`,
+            description: `Handle build completion for goal ${this.definition.uniqueName}`,
             subscription: GraphQL.subscription("OnBuildComplete"),
             listener: (event, context) => this.handleBuildCompleteEvent(event, context, this),
         });

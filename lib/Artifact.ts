@@ -73,8 +73,10 @@ export class Artifact extends FulfillableGoalWithRegistrations<ArtifactRegistrat
 
     public register(sdm: SoftwareDeliveryMachine): void {
         super.register(sdm);
+
         sdm.addEvent({
-            name: `${this.definition.uniqueName}-OnImageLinkedHandler`,
+            name: `OnImageLinkedHandler`,
+            description: `Handle image link events for goal ${this.definition.uniqueName}`,
             subscription: GraphQL.subscription("OnImageLinked"),
             listener: (event, context) => this.handle(event, context, this),
         });
