@@ -45,7 +45,6 @@ import {
     SdmGoalFulfillmentMethod,
     SdmGoalState,
     SideEffect,
-    slack,
     SoftwareDeliveryMachine,
     updateGoal,
 } from "@atomist/sdm";
@@ -150,36 +149,8 @@ export class Build
         await setBuiltContext(context, goal, sdmGoal,
             build.status,
                 build.buildUrl);
-        if (build.status === "failed" && build.buildUrl) {
-            const ac = addressChannelsFor(commit.repo, context);
-            await displayBuildLogFailure(id, build, ac, undefined);
-        }
         return Success;
     }
-}
-
-async function displayBuildLogFailure(id: RemoteRepoRef,
-                                      build: { buildUrl?: string, status?: string },
-                                      addressChannels: AddressChannels,
-                                      logInterpretation: LogInterpretation): Promise<any> {
-    const buildUrl = build.buildUrl;
-    if (buildUrl) {
-        logger.info("Retrieving failed build log from " + buildUrl);
-        const httpClient = DefaultHttpClientFactory.create();
-        const buildLog =  (await httpClient.exchange(buildUrl)).body as string;
-        logger.debug("Do we have a log interpretation? " + !!logInterpretation);
-        const interpretation = logInterpretation && logInterpretation.logInterpreter(buildLog);
-        logger.debug("What did it say? " + stringify(interpretation));
-        await reportFailureInterpretation("external-build", interpretation,
-            { log: buildLog, url: buildUrl }, id, addressChannels);
-
-    } else {
-        return addressChannels("No build log detected for " + linkToSha(id));
-    }
-}
-
-function linkToSha(id: RemoteRepoRef): string {
-    return slack.url(id.url + "/tree/" + id.sha, id.sha.substr(0, 6));
 }
 
 async function setBuiltContext(ctx: HandlerContext,
