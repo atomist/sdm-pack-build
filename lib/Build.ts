@@ -15,15 +15,13 @@
  */
 
 import {
-    DefaultHttpClientFactory,
     EventFired,
     GraphQL,
     HandlerContext,
     HandlerResult,
     logger,
-    RemoteRepoRef,
     Success,
-} from "@atomist/automation-client";
+ } from "@atomist/automation-client";
 import {
     AddressChannels,
     addressChannelsFor,
@@ -39,8 +37,6 @@ import {
     Implementation,
     ImplementationRegistration,
     IndependentOfEnvironment,
-    LogInterpretation,
-    reportFailureInterpretation,
     SdmGoalEvent,
     SdmGoalFulfillmentMethod,
     SdmGoalState,
@@ -48,7 +44,6 @@ import {
     SoftwareDeliveryMachine,
     updateGoal,
 } from "@atomist/sdm";
-import * as stringify from "json-stringify-safe";
 import {
     Builder,
     executeBuild,
