@@ -20,7 +20,13 @@ import {
     IssueCreationOptions,
     metadata,
 } from "@atomist/sdm";
+import { Build } from "./Build";
 import { buildAwareBuildListener } from "./support/build-aware/buildAwareBuildListener";
+
+export interface BuildAwareTransformOptions {
+    buildGoal: Build | Build[];
+    issueCreation: Partial<IssueCreationOptions>;
+}
 
 /**
  * Extension pack to add "build aware" code transform support, where
@@ -29,16 +35,20 @@ import { buildAwareBuildListener } from "./support/build-aware/buildAwareBuildLi
  * It's necessary to add this pack
  * to have dry run editorCommand function respond to builds.
  */
-export function buildAwareCodeTransforms(opts: Partial<IssueCreationOptions> = {}): ExtensionPack {
+export function buildAwareCodeTransforms(options: BuildAwareTransformOptions): ExtensionPack {
     const optsToUse: IssueCreationOptions = {
         issueRouter: new GitHubIssueRouter(),
-        ...opts,
-    };
+        ...(options.issueCreation || {}),
+}
+    ;
 
     return {
         ...metadata("build-aware-code-transforms"),
         configure: sdm => {
-            sdm.addBuildListener(buildAwareBuildListener(optsToUse));
+            if (!!options.buildGoal) {
+                const buildGoals = Array.isArray(options.buildGoal) ? options.buildGoal : [options.buildGoal];
+                buildGoals.forEach(bg => bg.withListener(buildAwareBuildListener(optsToUse)));
+            }
         },
     };
 }
