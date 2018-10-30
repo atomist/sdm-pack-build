@@ -1,4 +1,4 @@
-# @atomist-seeds/sdm-pack-build
+# @atomist/sdm-pack-build
 
 [![atomist sdm goals](http://badge.atomist.com/T29E48P34/atomist/sdm-pack-build/e59b9d52-5806-45b8-a67b-c45b03a0e5ee)](https://app.atomist.com/workspace/T29E48P34)
 [![npm version](https://img.shields.io/npm/v/@atomist/sdm-pack-build.svg)](https://www.npmjs.com/package/@atomist/sdm-pack-build)
