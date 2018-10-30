@@ -209,6 +209,8 @@ function updateBuildStatus(status: "started" | "failed" | "error" | "passed" | "
         commit: sdmGoal.sha,
         branch: sdmGoal.branch,
         provider: "sdm",
+        started_at: status === "started" ? new Date().toISOString() : undefined,
+        finished_at: status !== "started" ? new Date().toISOString() : undefined,
     };
     return postWebhook("build", data, team);
 }
