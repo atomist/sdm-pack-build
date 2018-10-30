@@ -153,7 +153,9 @@ export class Artifact extends FulfillableGoalWithRegistrations<ArtifactRegistrat
         await updateGoal(context, artifactSdmGoal, {
             state: SdmGoalState.success,
             description: goal.successDescription,
-            externalUrl: image.imageName,
+            externalUrls: [{
+                url: image.imageName,
+            }],
         });
         logger.info("Updated artifact goal '%s'", artifactSdmGoal.name);
         return Success;
