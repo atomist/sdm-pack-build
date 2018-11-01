@@ -108,6 +108,7 @@ export class Build
             name: `OnBuildComplete`,
             description: `Handle build completion for goal ${this.definition.uniqueName}`,
             subscription: GraphQL.subscription("OnBuildComplete"),
+            paramsMaker: () => sdm.configuration.sdm.credentialsResolver,
             listener: (event, context) => this.handleBuildCompleteEvent(event, context, this),
         });
     }
