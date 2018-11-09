@@ -29,26 +29,25 @@
     "lodash": "^4.17.11"
   },
   "peerDependencies": {
-    "@atomist/automation-client": "*",
-    "@atomist/sdm": "*",
-    "@atomist/sdm-core": "*"
+    "@atomist/automation-client": ">=1.0.1",
+    "@atomist/sdm": ">=1.0.1",
+    "@atomist/sdm-core": ">=1.0.1"
   },
   "devDependencies": {
-    "@atomist/automation-client": "1.0.0-RC.2",
-    "@atomist/sdm": "1.0.0-RC.2",
-    "@atomist/sdm-core": "1.0.0-RC.2",
+    "@atomist/automation-client": "1.0.1",
+    "@atomist/sdm": "1.0.1",
+    "@atomist/sdm-core": "1.0.1",
     "@types/mocha": "^5.2.5",
     "espower-typescript": "^9.0.0",
     "mocha": "^5.2.0",
     "npm-run-all": "^4.1.3",
-    "nyc": "^13.0.1",
     "rimraf": "^2.6.2",
     "source-map-support": "^0.5.9",
     "supervisor": "^0.12.0",
     "ts-node": "^7.0.1",
     "tslint": "^5.11.0",
-    "typedoc": "^0.11.1",
-    "typescript": "^2.9.2"
+    "typedoc": "^0.13.0",
+    "typescript": "^3.1.6"
   },
   "directories": {
     "test": "test"
@@ -69,7 +68,7 @@
     "gql:gen": "atm-gql-gen",
     "lint": "tslint --format verbose --project . --exclude \"node_modules/**\" --exclude \"**/*.d.ts\" \"**/*.ts\"",
     "lint:fix": "npm run lint -- --fix",
-    "test": "nyc mocha --require espower-typescript/guess --require source-map-support/register \"test/**/*.test.ts\"",
+    "test": "mocha --require espower-typescript/guess --require source-map-support/register \"test/**/*.test.ts\"",
     "test:one": "mocha --require espower-typescript/guess \"test/**/${TEST:-*.test.ts}\"",
     "typedoc": "npm run doc"
   },
