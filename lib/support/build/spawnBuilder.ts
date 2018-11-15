@@ -21,7 +21,6 @@ import {
     GitProject,
     logger,
     Project,
-    spawnAndWatch,
     SpawnCommand,
     stringifySpawnCommand,
 } from "@atomist/automation-client";
@@ -29,6 +28,7 @@ import {
     AppInfo,
     InterpretLog,
     serializeResult,
+    spawnAndWatch,
 } from "@atomist/sdm";
 import { SpawnOptions } from "child_process";
 import * as _ from "lodash";
