@@ -27,11 +27,12 @@ import {
     ArtifactListenerInvocation,
     ArtifactListenerRegisterable,
     DefaultGoalNameGenerator,
-    findSdmGoalOnCommit,
+    fetchGoalsForCommit,
     FulfillableGoalDetails,
     FulfillableGoalWithRegistrations,
     getGoalDefinitionFrom,
     Goal,
+    goalCorrespondsToSdmGoal,
     IndependentOfEnvironment,
     PushListenerInvocation,
     SdmGoalState,
@@ -95,12 +96,17 @@ export class Artifact extends FulfillableGoalWithRegistrations<ArtifactRegistrat
                 branch: commit.pushes[0].branch,
             });
 
-        const artifactSdmGoal = await findSdmGoalOnCommit(
+        const goals = await fetchGoalsForCommit(
             context,
             id,
-            commit.repo.org.provider.providerId,
-            goal);
-        if (!artifactSdmGoal) {
+            commit.repo.org.provider.providerId);
+
+        if (!goals) {
+            return Success;
+        }
+        const artifactGoals = goals.filter(g => goalCorrespondsToSdmGoal(goal, g));
+
+        if (artifactGoals.length > 0) {
             return Success;
         }
 
@@ -150,14 +156,17 @@ export class Artifact extends FulfillableGoalWithRegistrations<ArtifactRegistrat
             });
         }
 
-        await updateGoal(context, artifactSdmGoal, {
-            state: SdmGoalState.success,
-            description: goal.successDescription,
-            externalUrls: [{
-                url: image.imageName,
-            }],
-        });
-        logger.info("Updated artifact goal '%s'", artifactSdmGoal.name);
+        for (const artifactGoal of artifactGoals) {
+            await updateGoal(context, artifactGoal, {
+                state: SdmGoalState.success,
+                description: goal.successDescription,
+                externalUrls: [{
+                    label: "Image",
+                    url: image.imageName,
+                }],
+            });
+            logger.info("Updated artifact goal '%s' of goalSet '%s'", artifactGoal.name, artifactGoal.goalSetId);
+        }
         return Success;
     }
 }
