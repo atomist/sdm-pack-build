@@ -79,8 +79,8 @@ export class Build
 
         super({
             ...BuildGoal.definition,
-            ...getGoalDefinitionFrom(goalDetailsOrUniqueName, DefaultGoalNameGenerator.generateName("build")),
             displayName: "build",
+            ...getGoalDefinitionFrom(goalDetailsOrUniqueName, DefaultGoalNameGenerator.generateName("build")),
         }, ...dependsOn);
     }
 

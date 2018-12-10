@@ -50,7 +50,7 @@ export interface ArtifactRegistration {
 
 /**
  * This goal is fulfilled by an OnImageLinked event subscription. The Build goal will
- * cause such an event being emitted, but external CI systems can trigger the goal
+ * cause such an event to be emitted, but external CI systems can trigger the goal
  * fulfillment as well. On fulfillment, the external URL for the artifact will be
  * put on the goal instance and shown in the client.
  *
