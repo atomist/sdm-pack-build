@@ -1,6 +1,6 @@
 {
   "name": "@atomist/sdm-pack-build",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Extension Pack for an Atomist SDM to run CI builds",
   "author": {
     "name": "Atomist",
