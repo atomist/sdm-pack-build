@@ -15,20 +15,18 @@
  */
 
 import {
-    asSpawnCommand,
-    ChildProcessResult,
-    ErrorFinder,
     GitProject,
     logger,
     Project,
-    SpawnCommand,
-    stringifySpawnCommand,
 } from "@atomist/automation-client";
 import {
     AppInfo,
+    ErrorFinder,
     InterpretLog,
     serializeResult,
-    spawnAndWatch,
+    spawnAndLog,
+    SpawnLogCommand,
+    SpawnLogResult,
 } from "@atomist/sdm";
 import { SpawnOptions } from "child_process";
 import * as _ from "lodash";
@@ -45,7 +43,7 @@ export interface SpawnBuilderOptions {
      * Commands we'll execute via Node spawn.
      * Command execution will terminate on the first error.
      */
-    commands?: SpawnCommand[];
+    commands?: SpawnLogCommand[];
 
     /**
      * Alternative to commands. File containing a list of
@@ -112,7 +110,7 @@ export function spawnBuilder(options: SpawnBuilderOptions): Builder {
                 cloneOptions: { detachHead: true },
             },
             async p => {
-                const commands: SpawnCommand[] = options.commands || await loadCommandsFromFile(p, options.commandFile);
+                const commands: SpawnLogCommand[] = options.commands || await loadCommandsFromFile(p, options.commandFile);
 
                 const appId: AppInfo = await options.projectToAppInfo(p);
 
@@ -123,13 +121,13 @@ export function spawnBuilder(options: SpawnBuilderOptions): Builder {
                 }
                 const opts = _.merge({ cwd: p.baseDir }, optionsToUse);
 
-                function executeOne(buildCommand: SpawnCommand): Promise<ChildProcessResult> {
-                    return spawnAndWatch(buildCommand,
-                        _.merge(opts, buildCommand.options),
+                function executeOne(buildCommand: SpawnLogCommand): Promise<SpawnLogResult> {
+                    return spawnAndLog(
                         progressLog,
-                        {
-                            errorFinder,
-                        })
+                        buildCommand.command,
+                        buildCommand.args,
+                        _.merge(opts, buildCommand.options),
+                        )
                         .then(br => {
                             if (br.error) {
                                 const message =
@@ -159,7 +157,7 @@ export function spawnBuilder(options: SpawnBuilderOptions): Builder {
     };
 }
 
-async function loadCommandsFromFile(p: Project, path: string): Promise<SpawnCommand[]> {
+async function loadCommandsFromFile(p: Project, path: string): Promise<SpawnLogResult[]> {
     const buildFile = await p.getFile(path);
     if (!buildFile) {
         return undefined;
@@ -178,7 +176,7 @@ async function loadCommandsFromFile(p: Project, path: string): Promise<SpawnComm
 class SpawnedBuild implements BuildInProgress {
 
     constructor(public appInfo: AppInfo,
-                public buildResult: ChildProcessResult,
+                public buildResult: SpawnLogResult,
                 public deploymentUnitFile: string) {
     }
 
