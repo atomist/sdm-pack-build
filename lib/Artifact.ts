@@ -104,11 +104,6 @@ export class Artifact extends FulfillableGoalWithRegistrations<ArtifactRegistrat
         if (!goals) {
             return Success;
         }
-        const artifactGoals = goals.filter(g => goalCorrespondsToSdmGoal(goal, g));
-
-        if (artifactGoals.length > 0) {
-            return Success;
-        }
 
         if (goal.registrations.length > 0) {
             const credentials = goal.sdm.configuration.sdm.credentialsResolver.eventHandlerCredentials(context, id);
@@ -155,6 +150,8 @@ export class Artifact extends FulfillableGoalWithRegistrations<ArtifactRegistrat
                 }
             });
         }
+
+        const artifactGoals = goals.filter(g => goalCorrespondsToSdmGoal(goal, g));
 
         for (const artifactGoal of artifactGoals) {
             await updateGoal(context, artifactGoal, {
