@@ -72,14 +72,14 @@ export type Builder = (goalInvocation: GoalInvocation, buildNo: string) => Promi
  */
 export function executeBuild(builder: Builder): ExecuteGoal {
     return async (goalInvocation: GoalInvocation) => {
-        const { sdmGoal, id, context, progressLog } = goalInvocation;
+        const { goalEvent, id, context, progressLog } = goalInvocation;
 
         logger.info("Building project '%s/%s' with builder '%s'", id.owner, id.repo, builder.name);
 
-        const buildNumber = await obtainBuildIdentifier(sdmGoal, context);
+        const buildNumber = await obtainBuildIdentifier(goalEvent, context);
 
         try {
-            await updateBuildStatus("started", sdmGoal, progressLog.url, buildNumber, context.workspaceId);
+            await updateBuildStatus("started", goalEvent, progressLog.url, buildNumber, context.workspaceId);
             const rb = await builder(goalInvocation, buildNumber);
             try {
                 const br = rb.buildResult;
@@ -88,7 +88,7 @@ export function executeBuild(builder: Builder): ExecuteGoal {
                 await onExit(goalInvocation, !br.error, rb, buildNumber);
                 return br.error ? { code: 1, message: br.message } : Success;
             } catch (err) {
-                logger.warn("Build on branch %s failed on run: %j - %s", sdmGoal.branch, id, err.message);
+                logger.warn("Build on branch %s failed on run: %j - %s", goalEvent.branch, id, err.message);
                 progressLog.write(`Build failed with: ${err.message}`);
                 progressLog.write(err.stack);
                 await onExit(goalInvocation, false, rb, buildNumber);
@@ -96,9 +96,9 @@ export function executeBuild(builder: Builder): ExecuteGoal {
             }
         } catch (err) {
             // If we get here, the build failed before even starting
-            logger.warn("Build on branch %s failed on start: %j - %s", sdmGoal.branch, id, err.message);
+            logger.warn("Build on branch %s failed on start: %j - %s", goalEvent.branch, id, err.message);
             progressLog.write(`Build failed on start: ${err.message}`);
-            await updateBuildStatus("failed", sdmGoal, progressLog.url, buildNumber, context.workspaceId);
+            await updateBuildStatus("failed", goalEvent, progressLog.url, buildNumber, context.workspaceId);
             return failure(err);
         }
     };
@@ -108,17 +108,17 @@ async function onExit(gi: GoalInvocation,
                       success: boolean,
                       runningBuild: BuildInProgress,
                       buildNo: string): Promise<any> {
-    const { sdmGoal, credentials, id, context, progressLog } = gi;
+    const { goalEvent, credentials, id, context, progressLog } = gi;
     try {
         if (success) {
-            await updateBuildStatus("passed", sdmGoal, progressLog.url, buildNo, context.workspaceId);
-            await createBuildTag(id, sdmGoal, buildNo, context, credentials);
+            await updateBuildStatus("passed", goalEvent, progressLog.url, buildNo, context.workspaceId);
+            await createBuildTag(id, goalEvent, buildNo, context, credentials);
             if (!!runningBuild.deploymentUnitFile
                 && configurationValue<boolean>("sdm.build.imageLink", true)) {
                 await linkArtifact(gi, runningBuild);
             }
         } else {
-            await updateBuildStatus("failed", sdmGoal, progressLog.url, buildNo, context.workspaceId);
+            await updateBuildStatus("failed", goalEvent, progressLog.url, buildNo, context.workspaceId);
         }
     } catch (err) {
         logger.warn("Unexpected build exit error: %s", err);
@@ -185,9 +185,13 @@ async function createBuildTag(id: RemoteRepoRef,
 
 async function linkArtifact(gi: GoalInvocation,
                             rb: BuildInProgress): Promise<void> {
-    const { configuration, credentials, sdmGoal } = gi;
+    const { configuration, credentials, goalEvent } = gi;
     const imageUrl = await configuration.sdm.artifactStore.storeFile(rb.appInfo, rb.deploymentUnitFile, credentials);
-    await postLinkImageWebhook(sdmGoal.repo.owner, sdmGoal.repo.name, sdmGoal.sha, imageUrl, gi.context.workspaceId);
+    await postLinkImageWebhook(goalEvent.repo.owner,
+        goalEvent.repo.name,
+        goalEvent.sha,
+        imageUrl,
+        gi.context.workspaceId);
 }
 
 function updateBuildStatus(status: "started" | "failed" | "error" | "passed" | "canceled",

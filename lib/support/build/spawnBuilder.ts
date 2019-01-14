@@ -24,7 +24,7 @@ import {
     ErrorFinder,
     InterpretLog,
     serializeResult,
-    spawnAndLog,
+    spawnLog,
     SpawnLogResult,
 } from "@atomist/sdm";
 import { SpawnOptions } from "child_process";
@@ -122,9 +122,10 @@ export function spawnBuilder(options: SpawnBuilderOptions): Builder {
                 const opts = _.merge({ cwd: p.baseDir }, optionsToUse);
 
                 function executeOne(buildCommand: {command: string, options?: string[]}): Promise<SpawnLogResult> {
-                    return spawnAndLog(progressLog, buildCommand.command,
+                    return spawnLog(buildCommand.command,
                         _.merge(opts, buildCommand.options),
                         {
+                            log: progressLog,
                             errorFinder,
                         });
                 }
