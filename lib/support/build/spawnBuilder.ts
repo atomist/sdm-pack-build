@@ -15,20 +15,17 @@
  */
 
 import {
-    asSpawnCommand,
-    ChildProcessResult,
-    ErrorFinder,
     GitProject,
     logger,
     Project,
-    SpawnCommand,
-    stringifySpawnCommand,
 } from "@atomist/automation-client";
 import {
     AppInfo,
+    ErrorFinder,
     InterpretLog,
     serializeResult,
-    spawnAndWatch,
+    spawnAndLog,
+    SpawnLogResult,
 } from "@atomist/sdm";
 import { SpawnOptions } from "child_process";
 import * as _ from "lodash";
@@ -45,7 +42,7 @@ export interface SpawnBuilderOptions {
      * Commands we'll execute via Node spawn.
      * Command execution will terminate on the first error.
      */
-    commands?: SpawnCommand[];
+    commands?: Array<{command: string, args?: string[], options?: string[]}>;
 
     /**
      * Alternative to commands. File containing a list of
@@ -112,7 +109,8 @@ export function spawnBuilder(options: SpawnBuilderOptions): Builder {
                 cloneOptions: { detachHead: true },
             },
             async p => {
-                const commands: SpawnCommand[] = options.commands || await loadCommandsFromFile(p, options.commandFile);
+                const commands: Array<{command: string, args?: string[], options?: string[]}> =
+                    options.commands || await loadCommandsFromFile(p, options.commandFile);
 
                 const appId: AppInfo = await options.projectToAppInfo(p);
 
@@ -123,21 +121,11 @@ export function spawnBuilder(options: SpawnBuilderOptions): Builder {
                 }
                 const opts = _.merge({ cwd: p.baseDir }, optionsToUse);
 
-                function executeOne(buildCommand: SpawnCommand): Promise<ChildProcessResult> {
-                    return spawnAndWatch(buildCommand,
+                function executeOne(buildCommand: {command: string, options?: string[]}): Promise<SpawnLogResult> {
+                    return spawnAndLog(progressLog, buildCommand.command,
                         _.merge(opts, buildCommand.options),
-                        progressLog,
                         {
                             errorFinder,
-                        })
-                        .then(br => {
-                            if (br.error) {
-                                const message =
-                                    "Stopping build commands due to error on " + stringifySpawnCommand(buildCommand);
-                                progressLog.write(message);
-                                return { error: true, code: br.code, message, childProcess: undefined };
-                            }
-                            return br;
                         });
                 }
 
@@ -159,7 +147,8 @@ export function spawnBuilder(options: SpawnBuilderOptions): Builder {
     };
 }
 
-async function loadCommandsFromFile(p: Project, path: string): Promise<SpawnCommand[]> {
+async function loadCommandsFromFile(p: Project, path: string):
+    Promise<Array<{command: string, args?: string[], options?: string[]}>> {
     const buildFile = await p.getFile(path);
     if (!buildFile) {
         return undefined;
@@ -168,7 +157,7 @@ async function loadCommandsFromFile(p: Project, path: string): Promise<SpawnComm
     const commands = content.split("\n")
         .filter(l => !!l)
         .filter(l => !l.startsWith("#"))
-        .map(l => asSpawnCommand(l, {}));
+        .map(l => ({command: l}));
     logger.info("Found Atomist build file in project %j: Commands are %j", p.id,
         commands);
 
@@ -178,7 +167,7 @@ async function loadCommandsFromFile(p: Project, path: string): Promise<SpawnComm
 class SpawnedBuild implements BuildInProgress {
 
     constructor(public appInfo: AppInfo,
-                public buildResult: ChildProcessResult,
+                public buildResult: SpawnLogResult,
                 public deploymentUnitFile: string) {
     }
 

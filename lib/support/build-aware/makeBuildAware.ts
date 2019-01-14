@@ -42,7 +42,7 @@ export const makeBuildAware: CodeTransformRegistrationDecorator<any> =
             if (!!ctr.transformPresentation) {
                 return dryRunOf(ctr.transformPresentation(ci, p));
             } else {
-                // No edit mode was set explicitly. We need to set one that sets a branch:
+                // No edit mode was setsc t explicitly. We need to set one that sets a branch:
                 // No PR for now
                 const branch =
                     (ci.parameters as TransformModeSuggestion).desiredBranchName || `${ctr.name}-${Date.now()}`;
