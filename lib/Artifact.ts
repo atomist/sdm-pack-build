@@ -113,6 +113,7 @@ export class Artifact extends FulfillableGoalWithRegistrations<ArtifactRegistrat
                 id,
                 credentials);
             const addressChannels = addressChannelsFor(commit.repo, context);
+            const preferences = goal.sdm.configuration.sdm.preferenceStoreFactory(context);
 
             await goal.sdm.configuration.sdm.projectLoader.doWithProject({
                 credentials,
@@ -126,6 +127,7 @@ export class Artifact extends FulfillableGoalWithRegistrations<ArtifactRegistrat
                     context,
                     credentials,
                     addressChannels,
+                    preferences,
                     push: commit.pushes[0],
                     project,
                 };
@@ -133,6 +135,7 @@ export class Artifact extends FulfillableGoalWithRegistrations<ArtifactRegistrat
                     id,
                     context,
                     addressChannels,
+                    preferences,
                     deployableArtifact,
                     credentials,
                 };

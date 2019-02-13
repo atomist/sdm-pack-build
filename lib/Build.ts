@@ -1,5 +1,5 @@
 /*
- * Copyright © 2018 Atomist, Inc.
+ * Copyright © 2019 Atomist, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,9 +78,11 @@ export class Build
                 ...dependsOn: Goal[]) {
 
         super({
-            ...BuildGoal.definition,
             displayName: "build",
-            ...getGoalDefinitionFrom(goalDetailsOrUniqueName, DefaultGoalNameGenerator.generateName("build")),
+            ...getGoalDefinitionFrom(
+                goalDetailsOrUniqueName,
+                DefaultGoalNameGenerator.generateName("build"),
+                BuildGoal.definition),
         }, ...dependsOn);
     }
 
@@ -123,11 +125,13 @@ export class Build
         const sdmGoal = await findSdmGoalOnCommit(context, id, commit.repo.org.provider.providerId, goal);
         const credentials = goal.sdm.configuration.sdm.credentialsResolver.eventHandlerCredentials(context, id);
         const addressChannels: AddressChannels = addressChannelsFor(build.commit.repo, context);
+        const preferences = goal.sdm.configuration.sdm.preferenceStoreFactory(context);
         const bli: BuildListenerInvocation = {
             context,
             id,
             credentials,
             addressChannels,
+            preferences,
             build,
         };
         await Promise.all(goal.listeners
