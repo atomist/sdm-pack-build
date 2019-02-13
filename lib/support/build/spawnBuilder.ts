@@ -25,6 +25,7 @@ import {
     InterpretLog,
     serializeResult,
     spawnLog,
+    SpawnLogOptions,
     SpawnLogResult,
 } from "@atomist/sdm";
 import { SpawnOptions } from "child_process";
@@ -42,7 +43,7 @@ export interface SpawnBuilderOptions {
      * Commands we'll execute via Node spawn.
      * Command execution will terminate on the first error.
      */
-    commands?: Array<{command: string, args?: string[], options?: string[]}>;
+    commands?: Array<{command: string, args?: string[], options?: SpawnLogOptions}>;
 
     /**
      * Alternative to commands. File containing a list of
@@ -109,7 +110,7 @@ export function spawnBuilder(options: SpawnBuilderOptions): Builder {
                 cloneOptions: { detachHead: true },
             },
             async p => {
-                const commands: Array<{command: string, args?: string[], options?: string[]}> =
+                const commands: Array<{command: string, args?: string[], options?: SpawnLogOptions}> =
                     options.commands || await loadCommandsFromFile(p, options.commandFile);
 
                 const appId: AppInfo = await options.projectToAppInfo(p);
@@ -119,15 +120,15 @@ export function spawnBuilder(options: SpawnBuilderOptions): Builder {
                     logger.info("Enriching options from project %s/%s", p.id.owner, p.id.repo);
                     optionsToUse = await options.enrich(optionsToUse, p);
                 }
-                const opts = _.merge({ cwd: p.baseDir }, optionsToUse);
+                const opts = _.merge({ cwd: p.baseDir, log: progressLog,
+                    errorFinder }, optionsToUse);
 
-                function executeOne(buildCommand: {command: string, options?: string[]}): Promise<SpawnLogResult> {
+                function executeOne(buildCommand: { command: string,
+                                                    args?: string[],
+                                                    options?: SpawnLogOptions}): Promise<SpawnLogResult> {
                     return spawnLog(buildCommand.command,
-                        _.merge(opts, buildCommand.options),
-                        {
-                            log: progressLog,
-                            errorFinder,
-                        });
+                        buildCommand.args,
+                        _.merge(opts, buildCommand.options));
                 }
 
                 let buildResult = await executeOne(commands[0]);
@@ -149,7 +150,7 @@ export function spawnBuilder(options: SpawnBuilderOptions): Builder {
 }
 
 async function loadCommandsFromFile(p: Project, path: string):
-    Promise<Array<{command: string, args?: string[], options?: string[]}>> {
+    Promise<Array<{command: string, args?: string[], options?: SpawnLogOptions}>> {
     const buildFile = await p.getFile(path);
     if (!buildFile) {
         return undefined;
