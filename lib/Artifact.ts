@@ -22,6 +22,8 @@ import {
     logger,
     Success,
 } from "@atomist/automation-client";
+import { generateHash } from "@atomist/automation-client/lib/internal/util/string";
+import { generate } from "@atomist/automation-client/lib/operations/generate/generatorUtils";
 import {
     addressChannelsFor,
     ArtifactListenerInvocation,
@@ -76,7 +78,7 @@ export class Artifact extends FulfillableGoalWithRegistrations<ArtifactRegistrat
         super.register(sdm);
 
         sdm.addEvent({
-            name: `OnImageLinkedHandler`,
+            name: `OnImageLinkedHandler${generateHash(this.definition.uniqueName)}`,
             description: `Handle image link events for goal ${this.definition.uniqueName}`,
             subscription: GraphQL.subscription("OnImageLinked"),
             listener: (event, context) => this.handle(event, context, this),
