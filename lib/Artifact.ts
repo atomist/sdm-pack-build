@@ -23,7 +23,6 @@ import {
     Success,
 } from "@atomist/automation-client";
 import { generateHash } from "@atomist/automation-client/lib/internal/util/string";
-import { generate } from "@atomist/automation-client/lib/operations/generate/generatorUtils";
 import {
     addressChannelsFor,
     ArtifactListenerInvocation,
