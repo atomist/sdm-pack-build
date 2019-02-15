@@ -22,6 +22,7 @@ import {
     logger,
     Success,
 } from "@atomist/automation-client";
+import { generateHash } from "@atomist/automation-client/lib/internal/util/string";
 import {
     AddressChannels,
     addressChannelsFor,
@@ -107,7 +108,7 @@ export class Build
         super.register(sdm);
 
         sdm.addEvent({
-            name: `OnBuildComplete`,
+            name: `OnBuildComplete${generateHash(this.definition.uniqueName)}`,
             description: `Handle build completion for goal ${this.definition.uniqueName}`,
             subscription: GraphQL.subscription("OnBuildComplete"),
             paramsMaker: () => sdm.configuration.sdm.credentialsResolver,
