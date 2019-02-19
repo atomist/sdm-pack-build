@@ -16,7 +16,6 @@
 
 import {
     addressEvent,
-    ChildProcessResult,
     configurationValue,
     failure,
     HandlerContext,
@@ -31,6 +30,7 @@ import {
     ExecuteGoal,
     GoalInvocation,
     SdmGoalEvent,
+    SpawnLogResult,
 } from "@atomist/sdm";
 import {
     createTagForStatus,
@@ -48,7 +48,7 @@ import SdmBuildIdentifier = SdmBuildIdentifierForRepo.SdmBuildIdentifier;
 export interface BuildInProgress {
 
     /** Result of running the build */
-    readonly buildResult: ChildProcessResult;
+    readonly buildResult: SpawnLogResult;
 
     /** Available once build is complete */
     readonly appInfo: AppInfo;
@@ -190,7 +190,8 @@ async function linkArtifact(gi: GoalInvocation,
     await postLinkImageWebhook(
         goalEvent.repo.owner,
         goalEvent.repo.name,
-        goalEvent.sha, imageUrl,
+        goalEvent.sha,
+        imageUrl,
         gi.context.workspaceId);
 }
 
