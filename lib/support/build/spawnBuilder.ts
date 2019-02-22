@@ -131,15 +131,15 @@ export function spawnBuilder(options: SpawnBuilderOptions): Builder {
                         _.merge(opts, buildCommand.options));
                 }
 
-                let buildResult = await executeOne(commands[0]);
-                for (const buildCommand of commands.slice(1)) {
+                let buildResult;
+                for (const buildCommand of commands) {
+                    buildResult = await executeOne(buildCommand);
                     if (buildResult.error) {
                         throw new Error("Build failure: " + buildResult.error);
                     }
                     progressLog.write("/--");
                     progressLog.write(`Result: ${serializeResult(buildResult)}`);
                     progressLog.write("\\--");
-                    buildResult = await executeOne(buildCommand);
                 }
                 logger.info("Build RETURN: %j", buildResult);
                 return new SpawnedBuild(appId, buildResult,
