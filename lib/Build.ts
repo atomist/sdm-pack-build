@@ -38,13 +38,13 @@ import {
     Implementation,
     ImplementationRegistration,
     IndependentOfEnvironment,
+    resolveCredentialsPromise,
     SdmGoalEvent,
     SdmGoalFulfillmentMethod,
     SdmGoalState,
     SideEffect,
     SoftwareDeliveryMachine,
     updateGoal,
-    resolveCredentialsPromise,
 } from "@atomist/sdm";
 import {
     Builder,
