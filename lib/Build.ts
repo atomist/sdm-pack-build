@@ -44,6 +44,7 @@ import {
     SideEffect,
     SoftwareDeliveryMachine,
     updateGoal,
+    resolveCredentialsPromise,
 } from "@atomist/sdm";
 import {
     Builder,
@@ -124,9 +125,11 @@ export class Build
 
         const id = goal.sdm.configuration.sdm.repoRefResolver.toRemoteRepoRef(commit.repo, {sha: commit.sha});
         const sdmGoal = await findSdmGoalOnCommit(context, id, commit.repo.org.provider.providerId, goal);
-        const credentials = goal.sdm.configuration.sdm.credentialsResolver.eventHandlerCredentials(context, id);
+        const credentials = await resolveCredentialsPromise(
+            goal.sdm.configuration.sdm.credentialsResolver.eventHandlerCredentials(context, id));
         const addressChannels: AddressChannels = addressChannelsFor(build.commit.repo, context);
         const preferences = goal.sdm.configuration.sdm.preferenceStoreFactory(context);
+        const configuration = goal.sdm.configuration;
         const bli: BuildListenerInvocation = {
             context,
             id,
@@ -134,18 +137,16 @@ export class Build
             addressChannels,
             preferences,
             build,
+            configuration,
         };
         await Promise.all(goal.listeners
             .map(l => l(bli)),
         );
         if (!sdmGoal) {
-            logger.debug("No build goal on commit; ignoring someone else's build result");
             return Success;
         }
         if (sdmGoal.fulfillment.method !== SdmGoalFulfillmentMethod.SideEffect &&
             sdmGoal.fulfillment.method !== SdmGoalFulfillmentMethod.Other) {
-            logger.debug("This build goal is not set up to be completed based on the build node. %j",
-                sdmGoal.fulfillment);
             return Success;
         }
         logger.info("Updating build goal: %s", goal.context);

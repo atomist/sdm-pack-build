@@ -36,6 +36,7 @@ import {
     goalCorrespondsToSdmGoal,
     IndependentOfEnvironment,
     PushListenerInvocation,
+    resolveCredentialsPromise,
     SdmGoalState,
     SideEffect,
     SoftwareDeliveryMachine,
@@ -107,7 +108,8 @@ export class Artifact extends FulfillableGoalWithRegistrations<ArtifactRegistrat
         }
 
         if (goal.registrations.length > 0) {
-            const credentials = goal.sdm.configuration.sdm.credentialsResolver.eventHandlerCredentials(context, id);
+            const credentials = await resolveCredentialsPromise(
+                goal.sdm.configuration.sdm.credentialsResolver.eventHandlerCredentials(context, id));
             logger.info("Scanning artifact for %j", id);
             const deployableArtifact = await goal.sdm.configuration.sdm.artifactStore.checkout(
                 image.imageName,
@@ -115,7 +117,7 @@ export class Artifact extends FulfillableGoalWithRegistrations<ArtifactRegistrat
                 credentials);
             const addressChannels = addressChannelsFor(commit.repo, context);
             const preferences = goal.sdm.configuration.sdm.preferenceStoreFactory(context);
-
+            const configuration = goal.sdm.configuration;
             await goal.sdm.configuration.sdm.projectLoader.doWithProject({
                 credentials,
                 id,
@@ -131,6 +133,7 @@ export class Artifact extends FulfillableGoalWithRegistrations<ArtifactRegistrat
                     preferences,
                     push: commit.pushes[0],
                     project,
+                    configuration,
                 };
                 const ai: ArtifactListenerInvocation = {
                     id,
@@ -139,6 +142,7 @@ export class Artifact extends FulfillableGoalWithRegistrations<ArtifactRegistrat
                     preferences,
                     deployableArtifact,
                     credentials,
+                    configuration,
                 };
                 if (!!goal.registrations) {
                     const listeners = goal.registrations.length > 0 ?
