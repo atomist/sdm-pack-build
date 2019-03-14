@@ -1,0 +1,23 @@
+query BuildForCommit($sha: String!, $owner: String!, $repo: String!, $providerId: String!) {
+    Build(orderBy: finishedAt_desc) {
+        buildUrl
+        provider
+        name
+        status
+        startedAt
+        timestamp
+        commit(sha: $sha) @required {
+            sha
+            repo(owner: $owner, name: $repo) @required {
+                name
+                owner
+                org {
+                    provider(providerId: $providerId) @required {
+                        providerId
+                    }
+                }
+            }
+        }
+    }
+}
+
