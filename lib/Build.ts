@@ -19,7 +19,6 @@ import {
     GraphQL,
     HandlerContext,
     HandlerResult,
-    logger,
     Success,
 } from "@atomist/automation-client";
 import { generateHash } from "@atomist/automation-client/lib/internal/util/string";
@@ -29,7 +28,6 @@ import {
     BuildListener,
     BuildListenerInvocation,
     DefaultGoalNameGenerator,
-    descriptionFromState,
     findSdmGoalOnCommit,
     FulfillableGoalDetails,
     FulfillableGoalWithRegistrationsAndListeners,
@@ -38,20 +36,18 @@ import {
     Implementation,
     ImplementationRegistration,
     IndependentOfEnvironment,
-    SdmGoalEvent,
-    SdmGoalFulfillmentMethod,
-    SdmGoalState,
-    SideEffect,
-    SoftwareDeliveryMachine,
-    updateGoal,
     resolveCredentialsPromise,
+    SoftwareDeliveryMachine,
 } from "@atomist/sdm";
 import {
     Builder,
     executeBuild,
 } from "./support/build/executeBuild";
 import {
-    BuildStatus,
+    executeCheckBuild,
+    setBuildContext,
+} from "./support/build/executeCheckBuild";
+import {
     OnBuildComplete,
 } from "./typings/types";
 
@@ -73,7 +69,8 @@ export interface ExternalBuildRegistration extends Partial<ImplementationRegistr
  * Goal that performs builds: For example using a Maven or NPM Builder implementation
  */
 export class Build
-    extends FulfillableGoalWithRegistrationsAndListeners<BuilderRegistration|ExternalBuildRegistration, BuildListener> {
+    extends
+        FulfillableGoalWithRegistrationsAndListeners<BuilderRegistration | ExternalBuildRegistration, BuildListener> {
 
     constructor(goalDetailsOrUniqueName: FulfillableGoalDetails | string
                     = DefaultGoalNameGenerator.generateName("build"),
@@ -88,7 +85,7 @@ export class Build
         }, ...dependsOn);
     }
 
-    public with(registration: BuilderRegistration|ExternalBuildRegistration): this {
+    public with(registration: BuilderRegistration | ExternalBuildRegistration): this {
         if ((registration as BuilderRegistration).builder) {
             const fulfillment: Implementation = {
                 name: DefaultGoalNameGenerator.generateName("builder"),
@@ -97,8 +94,9 @@ export class Build
             };
             this.addFulfillment(fulfillment);
         } else {
-            const fulfillment: SideEffect = {
+            const fulfillment: Implementation = {
                 name: (registration as ExternalBuildRegistration).externalTool,
+                goalExecutor: executeCheckBuild(),
             };
             this.addFulfillment(fulfillment);
         }
@@ -123,7 +121,7 @@ export class Build
         const build = event.data.Build[0];
         const commit: OnBuildComplete.Commit = build.commit;
 
-        const id = goal.sdm.configuration.sdm.repoRefResolver.toRemoteRepoRef(commit.repo, {sha: commit.sha});
+        const id = goal.sdm.configuration.sdm.repoRefResolver.toRemoteRepoRef(commit.repo, { sha: commit.sha });
         const sdmGoal = await findSdmGoalOnCommit(context, id, commit.repo.org.provider.providerId, goal);
         const credentials = await resolveCredentialsPromise(
             goal.sdm.configuration.sdm.credentialsResolver.eventHandlerCredentials(context, id));
@@ -145,42 +143,13 @@ export class Build
         if (!sdmGoal) {
             return Success;
         }
-        if (sdmGoal.fulfillment.method !== SdmGoalFulfillmentMethod.SideEffect &&
-            sdmGoal.fulfillment.method !== SdmGoalFulfillmentMethod.Other) {
+        if (build.provider === "sdm") {
             return Success;
         }
-        logger.info("Updating build goal: %s", goal.context);
-        await setBuiltContext(context, goal, sdmGoal,
+        await setBuildContext(context, goal, sdmGoal,
             build.status,
-                build.buildUrl);
+            build.buildUrl);
         return Success;
-    }
-}
-
-async function setBuiltContext(ctx: HandlerContext,
-                               goal: Goal,
-                               sdmGoal: SdmGoalEvent,
-                               state: BuildStatus,
-                               url: string): Promise<any> {
-    const newState = buildStatusToSdmGoalState(state);
-    return updateGoal(ctx, sdmGoal,
-        {
-            url,
-            state: newState,
-            description: descriptionFromState(goal, newState),
-        });
-}
-
-function buildStatusToSdmGoalState(buildStatus: BuildStatus): SdmGoalState {
-    switch (buildStatus) {
-        case "passed":
-            return SdmGoalState.success;
-        case "broken":
-        case "failed":
-        case "canceled":
-            return SdmGoalState.failure;
-        default:
-            return SdmGoalState.in_process;
     }
 }
 
