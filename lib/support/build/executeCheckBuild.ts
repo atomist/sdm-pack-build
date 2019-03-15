@@ -26,12 +26,12 @@ import {
     SdmGoalEvent,
     updateGoal,
 } from "@atomist/sdm";
+import * as _ from "lodash";
 import {
     BuildForCommit,
     BuildStatus,
     SdmGoalState,
 } from "../../typings/types";
-import * as _ from "lodash";
 
 /**
  * Checks if there is already a build on the Commit.
@@ -52,7 +52,7 @@ export function executeCheckBuild(): ExecuteGoal {
             options: QueryNoCacheOptions,
         });
 
-        const build = _.get(builds, "Commit[0].builds[0]") as BuildForCommit.Builds;
+        const build = _.get(builds, "Commit[0].builds[0]");
         if (!!build) {
             progressLog.write(
                 `External build ${build.name} from provider ${build.provider} with status ${build.status} received`);
