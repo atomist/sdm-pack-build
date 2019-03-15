@@ -4,6 +4,7 @@ subscription OnBuildComplete {
     buildUrl
     compareUrl
     name
+    provider
     status
     jobId
     startedAt
