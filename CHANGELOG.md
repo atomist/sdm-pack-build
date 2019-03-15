@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased](https://github.com/atomist/sdm-pack-seed/compare/1.0.3...HEAD)
 
+### Added
+
+-   Check if build event already exists. [#29](https://github.com/atomist/sdm-pack-build/issues/29)
+
 ### Changed
 
 -   Removes deprecated APIs. [#27](https://github.com/atomist/sdm-pack-build/issues/27)
