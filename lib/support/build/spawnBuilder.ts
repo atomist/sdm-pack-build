@@ -20,7 +20,6 @@ import {
     Project,
 } from "@atomist/automation-client";
 import {
-    AppInfo,
     ErrorFinder,
     InterpretLog,
     serializeResult,
@@ -73,23 +72,6 @@ export interface SpawnBuilderOptions {
      * @return {Promise<module:child_process.SpawnOptions>}
      */
     enrich?(options: SpawnOptions, p: GitProject): Promise<SpawnOptions>;
-
-    /**
-     * Find artifact info from the sources of this project,
-     * for example by parsing a package.json or Maven POM file.
-     * @param {Project} p
-     * @return {Promise<AppInfo>}
-     */
-    projectToAppInfo(p: Project): Promise<AppInfo>;
-
-    /**
-     * Find the deploymentUnit after a successful build
-     * @param {Project} p
-     * @param {AppInfo} appId
-     * @return {Promise<string>}
-     */
-    deploymentUnitFor?(p: GitProject, appId: AppInfo): Promise<string>;
-
 }
 
 export function spawnBuilder(options: SpawnBuilderOptions): Builder {
@@ -113,8 +95,6 @@ export function spawnBuilder(options: SpawnBuilderOptions): Builder {
                 const commands: Array<{command: string, args?: string[], options?: SpawnLogOptions}> =
                     options.commands || await loadCommandsFromFile(p, options.commandFile);
 
-                const appId: AppInfo = await options.projectToAppInfo(p);
-
                 let optionsToUse = options.options || {};
                 if (!!options.enrich) {
                     logger.info("Enriching options from project %s/%s", p.id.owner, p.id.repo);
@@ -131,19 +111,19 @@ export function spawnBuilder(options: SpawnBuilderOptions): Builder {
                         _.merge(opts, buildCommand.options));
                 }
 
-                let buildResult;
+                let spawnLogResult: SpawnLogResult;
                 for (const buildCommand of commands) {
-                    buildResult = await executeOne(buildCommand);
-                    if (buildResult.error) {
-                        throw new Error("Build failure: " + buildResult.error);
+                    spawnLogResult = await executeOne(buildCommand);
+                    if (spawnLogResult.error) {
+                        throw new Error("Build failure: " + spawnLogResult.error);
                     }
                     progressLog.write("/--");
-                    progressLog.write(`Result: ${serializeResult(buildResult)}`);
+                    progressLog.write(`Result: ${serializeResult(spawnLogResult)}`);
                     progressLog.write("\\--");
                 }
-                logger.info("Build RETURN: %j", buildResult);
-                return new SpawnedBuild(appId, buildResult,
-                    !!options.deploymentUnitFor ? await options.deploymentUnitFor(p, appId) : undefined);
+                logger.info("Build RETURN: %j", spawnLogResult);
+                const buildResult: BuildInProgress = { buildResult: spawnLogResult };
+                return buildResult ;
             });
 
     };
@@ -164,13 +144,4 @@ async function loadCommandsFromFile(p: Project, path: string):
         commands);
 
     return commands;
-}
-
-class SpawnedBuild implements BuildInProgress {
-
-    constructor(public appInfo: AppInfo,
-                public buildResult: SpawnLogResult,
-                public deploymentUnitFile: string) {
-    }
-
 }
