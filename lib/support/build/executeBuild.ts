@@ -26,7 +26,6 @@ import {
     Success,
 } from "@atomist/automation-client";
 import {
-    AppInfo,
     ExecuteGoal,
     GoalInvocation,
     SdmGoalEvent,
@@ -35,7 +34,6 @@ import {
 import {
     createTagForStatus,
     isInLocalMode,
-    postLinkImageWebhook,
     postWebhook,
     readSdmVersion,
 } from "@atomist/sdm-core";
@@ -49,12 +47,6 @@ export interface BuildInProgress {
 
     /** Result of running the build */
     readonly buildResult: SpawnLogResult;
-
-    /** Available once build is complete */
-    readonly appInfo: AppInfo;
-
-    /** Deployment unit file name produced by the build */
-    readonly deploymentUnitFile: string;
 }
 
 /**
@@ -113,10 +105,6 @@ async function onExit(gi: GoalInvocation,
         if (success) {
             await updateBuildStatus("passed", goalEvent, progressLog.url, buildNo, context.workspaceId);
             await createBuildTag(id, goalEvent, buildNo, context, credentials);
-            if (!!runningBuild.deploymentUnitFile
-                && configurationValue<boolean>("sdm.build.imageLink", true)) {
-                await linkArtifact(gi, runningBuild);
-            }
         } else {
             await updateBuildStatus("failed", goalEvent, progressLog.url, buildNo, context.workspaceId);
         }
@@ -181,18 +169,6 @@ async function createBuildTag(id: RemoteRepoRef,
                 credentials);
         }
     }
-}
-
-async function linkArtifact(gi: GoalInvocation,
-                            rb: BuildInProgress): Promise<void> {
-    const { configuration, credentials, goalEvent } = gi;
-    const imageUrl = await configuration.sdm.artifactStore.storeFile(rb.appInfo, rb.deploymentUnitFile, credentials);
-    await postLinkImageWebhook(
-        goalEvent.repo.owner,
-        goalEvent.repo.name,
-        goalEvent.sha,
-        imageUrl,
-        gi.context.workspaceId);
 }
 
 function updateBuildStatus(status: "started" | "failed" | "error" | "passed" | "canceled",
