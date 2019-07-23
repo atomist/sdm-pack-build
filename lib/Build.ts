@@ -95,6 +95,7 @@ export class Build
             this.addFulfillment(fulfillment);
         } else {
             const fulfillment: Implementation = {
+                ...(registration as ExternalBuildRegistration),
                 name: (registration as ExternalBuildRegistration).externalTool,
                 goalExecutor: executeCheckBuild(),
             };
