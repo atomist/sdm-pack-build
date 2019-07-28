@@ -94,6 +94,8 @@ export class Build
             };
             this.addFulfillment(fulfillment);
         } else {
+            // Side-effected goals can't be restarted; a success from the external system will set them to success
+            this.definition.retryFeasible = false;
             const fulfillment: Implementation = {
                 ...(registration as ExternalBuildRegistration),
                 name: (registration as ExternalBuildRegistration).externalTool,
