@@ -139,7 +139,7 @@ export class Build
             preferences,
             build,
             configuration,
-        };
+        } as any;
         await Promise.all(goal.listeners
             .map(l => l(bli)),
         );

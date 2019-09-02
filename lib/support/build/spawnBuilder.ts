@@ -20,7 +20,6 @@ import {
     Project,
 } from "@atomist/automation-client";
 import {
-    AppInfo,
     ErrorFinder,
     InterpretLog,
     serializeResult,
@@ -28,6 +27,7 @@ import {
     SpawnLogOptions,
     SpawnLogResult,
 } from "@atomist/sdm";
+import { AppInfo } from "@atomist/sdm/lib/spi/deploy/Deployment";
 import { SpawnOptions } from "child_process";
 import * as _ from "lodash";
 import {
