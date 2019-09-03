@@ -26,7 +26,6 @@ import {
     Success,
 } from "@atomist/automation-client";
 import {
-    AppInfo,
     ExecuteGoal,
     GoalInvocation,
     SdmGoalEvent,
@@ -39,6 +38,7 @@ import {
     postWebhook,
     readSdmVersion,
 } from "@atomist/sdm-core";
+import { AppInfo } from "@atomist/sdm/lib/spi/deploy/Deployment";
 import { SdmBuildIdentifierForRepo } from "../../typings/types";
 import SdmBuildIdentifier = SdmBuildIdentifierForRepo.SdmBuildIdentifier;
 

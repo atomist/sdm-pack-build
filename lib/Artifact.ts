@@ -134,7 +134,7 @@ export class Artifact extends FulfillableGoalWithRegistrations<ArtifactRegistrat
                     push: commit.pushes[0],
                     project,
                     configuration,
-                };
+                } as any;
                 const ai: ArtifactListenerInvocation = {
                     id,
                     context,
