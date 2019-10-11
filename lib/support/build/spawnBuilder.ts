@@ -106,7 +106,7 @@ export function spawnBuilder(options: SpawnBuilderOptions): Builder {
         return configuration.sdm.projectLoader.doWithProject({
                 credentials,
                 id,
-                readOnly: true,
+                readOnly: false,
                 cloneOptions: { detachHead: true },
             },
             async p => {
