@@ -97,15 +97,14 @@ export function spawnBuilder(options: SpawnBuilderOptions): Builder {
         throw new Error("Please supply either commands or a path to a file in the project containing them");
     }
     return async goalInvocation => {
-        const { configuration, credentials, id, progressLog } = goalInvocation;
+        const { configuration, id, progressLog } = goalInvocation;
         const errorFinder = options.errorFinder;
 
         logger.info("Starting build on %s/%s, buildCommands '%j' or file '%s'", id.owner, id.repo, options.commands,
             options.commandFile);
 
         return configuration.sdm.projectLoader.doWithProject({
-                credentials,
-                id,
+                ...goalInvocation,
                 readOnly: false, // a build command is likely going to make changes
                 cloneOptions: { detachHead: true },
             },
