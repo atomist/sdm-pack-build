@@ -106,7 +106,7 @@ export function spawnBuilder(options: SpawnBuilderOptions): Builder {
         return configuration.sdm.projectLoader.doWithProject({
                 credentials,
                 id,
-                readOnly: false,
+                readOnly: false, // a build command is likely going to make changes
                 cloneOptions: { detachHead: true },
             },
             async p => {
