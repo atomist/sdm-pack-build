@@ -37,7 +37,9 @@
     "cyclomatic-complexity": {
       "severity": "warning"
     },
-    "deprecation": true,
+    "deprecation": {
+      "severity": "warning"
+    },
     "eofline": true,
     "forin": true,
     "import-blacklist": [true, "axios"],

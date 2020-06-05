@@ -14,22 +14,15 @@
  * limitations under the License.
  */
 
-import {
-    GitProject,
-    logger,
-    Project,
-} from "@atomist/automation-client";
-import {
-    ErrorFinder,
-    InterpretLog,
-    serializeResult,
-    spawnLog,
-    SpawnLogOptions,
-    SpawnLogResult,
-} from "@atomist/sdm";
-import { AppInfo } from "@atomist/sdm/lib/spi/deploy/Deployment";
+import {GitProject} from "@atomist/automation-client/lib/project/git/GitProject";
+import {Project} from "@atomist/automation-client/lib/project/Project";
+import {logger} from "@atomist/automation-client/lib/util/logger";
+import {ErrorFinder, spawnLog, SpawnLogOptions, SpawnLogResult} from "@atomist/sdm/lib/api-helper/misc/child_process";
+import {serializeResult} from "@atomist/sdm/lib/api-helper/misc/result";
+import {InterpretLog} from "@atomist/sdm/lib/spi/log/InterpretedLog";
 import { SpawnOptions } from "child_process";
 import * as _ from "lodash";
+import { AppInfo } from "./AppInfo";
 import {
     Builder,
     BuildInProgress,
@@ -87,6 +80,8 @@ export interface SpawnBuilderOptions {
      * @param {Project} p
      * @param {AppInfo} appId
      * @return {Promise<string>}
+     *
+     * @deprecated Artifact concept deprecated. Use project listeners to store artifacts after goals.
      */
     deploymentUnitFor?(p: GitProject, appId: AppInfo): Promise<string>;
 

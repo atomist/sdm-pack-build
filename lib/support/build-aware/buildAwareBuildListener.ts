@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-import { logger } from "@atomist/automation-client";
-import {
-    BuildListener,
-    IssueCreationOptions,
-} from "@atomist/sdm";
+import {logger} from "@atomist/automation-client/lib/util/logger";
+import {BuildListener} from "@atomist/sdm/lib/api/listener/BuildListener";
+import {IssueCreationOptions} from "@atomist/sdm/lib/spi/issue/IssueCreationOptions";
 import { BuildAwareMarker } from "./makeBuildAware";
 
 /**

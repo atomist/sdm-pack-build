@@ -14,31 +14,25 @@
  * limitations under the License.
  */
 
+import {subscription} from "@atomist/automation-client/lib/graph/graphQL";
+import {EventFired} from "@atomist/automation-client/lib/HandleEvent";
+import {HandlerContext} from "@atomist/automation-client/lib/HandlerContext";
+import {HandlerResult, Success} from "@atomist/automation-client/lib/HandlerResult";
+import {generateHash} from "@atomist/automation-client/lib/internal/util/string";
+import {findSdmGoalOnCommit} from "@atomist/sdm/lib/api-helper/goal/fetchGoalsOnCommit";
+import {resolveCredentialsPromise} from "@atomist/sdm/lib/api-helper/machine/handlerRegistrations";
+import {AddressChannels, addressChannelsFor} from "@atomist/sdm/lib/api/context/addressChannels";
+import {Goal} from "@atomist/sdm/lib/api/goal/Goal";
+import {DefaultGoalNameGenerator} from "@atomist/sdm/lib/api/goal/GoalNameGenerator";
 import {
-    EventFired,
-    GraphQL,
-    HandlerContext,
-    HandlerResult,
-    Success,
-} from "@atomist/automation-client";
-import { generateHash } from "@atomist/automation-client/lib/internal/util/string";
-import {
-    AddressChannels,
-    addressChannelsFor,
-    BuildListener,
-    BuildListenerInvocation,
-    DefaultGoalNameGenerator,
-    findSdmGoalOnCommit,
-    FulfillableGoalDetails,
-    FulfillableGoalWithRegistrationsAndListeners,
-    getGoalDefinitionFrom,
-    Goal,
-    Implementation,
+    FulfillableGoalDetails, FulfillableGoalWithRegistrationsAndListeners,
+    getGoalDefinitionFrom, Implementation,
     ImplementationRegistration,
-    IndependentOfEnvironment,
-    resolveCredentialsPromise,
-    SoftwareDeliveryMachine,
-} from "@atomist/sdm";
+} from "@atomist/sdm/lib/api/goal/GoalWithFulfillment";
+import {IndependentOfEnvironment} from "@atomist/sdm/lib/api/goal/support/environment";
+import {BuildListener, BuildListenerInvocation} from "@atomist/sdm/lib/api/listener/BuildListener";
+import {SoftwareDeliveryMachine} from "@atomist/sdm/lib/api/machine/SoftwareDeliveryMachine";
+import {OnBuildComplete} from "@atomist/sdm/lib/typings/types";
 import {
     Builder,
     executeBuild,
@@ -47,9 +41,6 @@ import {
     executeCheckBuild,
     setBuildContext,
 } from "./support/build/executeCheckBuild";
-import {
-    OnBuildComplete,
-} from "./typings/types";
 
 /**
  * Register a Builder for a certain type of push
@@ -112,7 +103,7 @@ export class Build
         sdm.addEvent({
             name: `OnBuildComplete${generateHash(this.definition.uniqueName)}`,
             description: `Handle build completion for goal ${this.definition.uniqueName}`,
-            subscription: GraphQL.subscription("OnBuildComplete"),
+            subscription: subscription("OnBuildComplete"),
             paramsMaker: () => sdm.configuration.sdm.credentialsResolver,
             listener: (event, context) => this.handleBuildCompleteEvent(event, context, this),
         });
@@ -146,9 +137,10 @@ export class Build
         if (!sdmGoal) {
             return Success;
         }
-        if (build.provider === "sdm") {
-            return Success;
-        }
+        // TODO: Do we need to account for this in 2.0?
+        // if (build.provider === "sdm") {
+        //     return Success;
+        // }
         await setBuildContext(context, goal, sdmGoal,
             build.status,
             build.buildUrl);

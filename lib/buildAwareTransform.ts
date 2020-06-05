@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-import {
-    ExtensionPack,
-    GitHubIssueRouter,
-    IssueCreationOptions,
-    metadata,
-} from "@atomist/sdm";
+import {metadata} from "@atomist/sdm/lib/api-helper/misc/extensionPack";
+import {GitHubIssueRouter} from "@atomist/sdm/lib/api-helper/misc/git/GitHubIssueRouter";
+import {ExtensionPack} from "@atomist/sdm/lib/api/machine/ExtensionPack";
+import {IssueCreationOptions} from "@atomist/sdm/lib/spi/issue/IssueCreationOptions";
 import { Build } from "./Build";
 import { buildAwareBuildListener } from "./support/build-aware/buildAwareBuildListener";
 
