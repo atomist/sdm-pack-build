@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import { logger } from "@atomist/automation-client";
-import {
-    BuildListener,
-    IssueCreationOptions,
-} from "@atomist/sdm";
+
 import { BuildAwareMarker } from "./makeBuildAware";
+import {IssueCreationOptions} from "@atomist/sdm/lib/spi/issue/IssueCreationOptions";
+import {BuildListener} from "@atomist/sdm/lib/api/listener/BuildListener";
+import {logger} from "@atomist/automation-client/lib/util/logger";
 
 /**
  * React to result of a build-aware build to raise a PR or issue.

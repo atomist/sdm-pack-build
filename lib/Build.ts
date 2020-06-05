@@ -15,31 +15,6 @@
  */
 
 import {
-    EventFired,
-    GraphQL,
-    HandlerContext,
-    HandlerResult,
-    Success,
-} from "@atomist/automation-client";
-import { generateHash } from "@atomist/automation-client/lib/internal/util/string";
-import {
-    AddressChannels,
-    addressChannelsFor,
-    BuildListener,
-    BuildListenerInvocation,
-    DefaultGoalNameGenerator,
-    findSdmGoalOnCommit,
-    FulfillableGoalDetails,
-    FulfillableGoalWithRegistrationsAndListeners,
-    getGoalDefinitionFrom,
-    Goal,
-    Implementation,
-    ImplementationRegistration,
-    IndependentOfEnvironment,
-    resolveCredentialsPromise,
-    SoftwareDeliveryMachine,
-} from "@atomist/sdm";
-import {
     Builder,
     executeBuild,
 } from "./support/build/executeBuild";
@@ -48,8 +23,24 @@ import {
     setBuildContext,
 } from "./support/build/executeCheckBuild";
 import {
-    OnBuildComplete,
-} from "./typings/types";
+    FulfillableGoalDetails, FulfillableGoalWithRegistrationsAndListeners,
+    getGoalDefinitionFrom, Implementation,
+    ImplementationRegistration
+} from "@atomist/sdm/lib/api/goal/GoalWithFulfillment";
+import {resolveCredentialsPromise} from "@atomist/sdm/lib/api-helper/machine/handlerRegistrations";
+import {BuildListener, BuildListenerInvocation} from "@atomist/sdm/lib/api/listener/BuildListener";
+import {HandlerContext} from "@atomist/automation-client/lib/HandlerContext";
+import {SoftwareDeliveryMachine} from "@atomist/sdm/lib/api/machine/SoftwareDeliveryMachine";
+import {DefaultGoalNameGenerator} from "@atomist/sdm/lib/api/goal/GoalNameGenerator";
+import {HandlerResult, Success} from "@atomist/automation-client/lib/HandlerResult";
+import {generateHash} from "@atomist/automation-client/lib/internal/util/string";
+import {EventFired} from "@atomist/automation-client/lib/HandleEvent";
+import {AddressChannels, addressChannelsFor} from "@atomist/sdm/lib/api/context/addressChannels";
+import {Goal} from "@atomist/sdm/lib/api/goal/Goal";
+import {OnBuildComplete} from "@atomist/sdm/lib/typings/types";
+import {findSdmGoalOnCommit} from "@atomist/sdm/lib/api-helper/goal/fetchGoalsOnCommit";
+import {IndependentOfEnvironment} from "@atomist/sdm/lib/api/goal/support/environment";
+import {subscription} from "@atomist/automation-client/lib/graph/graphQL";
 
 /**
  * Register a Builder for a certain type of push
@@ -112,7 +103,7 @@ export class Build
         sdm.addEvent({
             name: `OnBuildComplete${generateHash(this.definition.uniqueName)}`,
             description: `Handle build completion for goal ${this.definition.uniqueName}`,
-            subscription: GraphQL.subscription("OnBuildComplete"),
+            subscription: subscription("OnBuildComplete"),
             paramsMaker: () => sdm.configuration.sdm.credentialsResolver,
             listener: (event, context) => this.handleBuildCompleteEvent(event, context, this),
         });
@@ -146,9 +137,9 @@ export class Build
         if (!sdmGoal) {
             return Success;
         }
-        if (build.provider === "sdm") {
-            return Success;
-        }
+        // if (build.provider === "sdm") {
+        //     return Success;
+        // }
         await setBuildContext(context, goal, sdmGoal,
             build.status,
             build.buildUrl);

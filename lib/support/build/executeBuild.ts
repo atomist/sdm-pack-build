@@ -14,33 +14,22 @@
  * limitations under the License.
  */
 
-import {
-    addressEvent,
-    configurationValue,
-    failure,
-    HandlerContext,
-    logger,
-    ProjectOperationCredentials,
-    QueryNoCacheOptions,
-    RemoteRepoRef,
-    Success,
-} from "@atomist/automation-client";
-import {
-    ExecuteGoal,
-    GoalInvocation,
-    SdmGoalEvent,
-    SpawnLogResult,
-} from "@atomist/sdm";
-import {
-    createTagForStatus,
-    isInLocalMode,
-    postLinkImageWebhook,
-    postWebhook,
-    readSdmVersion,
-} from "@atomist/sdm-core";
-import { AppInfo } from "@atomist/sdm/lib/spi/deploy/Deployment";
-import { SdmBuildIdentifierForRepo } from "../../typings/types";
-import SdmBuildIdentifier = SdmBuildIdentifierForRepo.SdmBuildIdentifier;
+import {readSdmVersion} from "@atomist/sdm-core/lib/internal/delivery/build/local/projectVersioner";
+import {postWebhook} from "@atomist/sdm-core/lib/util/webhook/ImageLink";
+import {ProjectOperationCredentials} from "@atomist/automation-client/lib/operations/common/ProjectOperationCredentials";
+import {logger} from "@atomist/automation-client/lib/util/logger";
+import {HandlerContext} from "@atomist/automation-client/lib/HandlerContext";
+import {ExecuteGoal, GoalInvocation} from "@atomist/sdm/lib/api/goal/GoalInvocation";
+import {failure, Success} from "@atomist/automation-client/lib/HandlerResult";
+import {RemoteRepoRef} from "@atomist/automation-client/lib/operations/common/RepoId";
+import {QueryNoCacheOptions} from "@atomist/automation-client/lib/spi/graph/GraphClient";
+import {addressEvent} from "@atomist/automation-client/lib/spi/message/MessageClient";
+import {SpawnLogResult} from "@atomist/sdm/lib/api-helper/misc/child_process";
+import {isInLocalMode} from "@atomist/sdm-core/lib/internal/machine/modes";
+import {SdmGoalEvent} from "@atomist/sdm/lib/api/goal/SdmGoalEvent";
+import {configurationValue} from "@atomist/automation-client/lib/configuration";
+import {createTagForStatus} from "@atomist/sdm-core/lib/internal/delivery/build/executeTag";
+import {SdmBuildIdentifier} from "@atomist/sdm/lib/typings/types";
 
 /**
  * Result of a Builder invocation
@@ -51,7 +40,7 @@ export interface BuildInProgress {
     readonly buildResult: SpawnLogResult;
 
     /** Available once build is complete */
-    readonly appInfo: AppInfo;
+    readonly appInfo: Info;
 
     /** Deployment unit file name produced by the build */
     readonly deploymentUnitFile: string;
@@ -185,14 +174,7 @@ async function createBuildTag(id: RemoteRepoRef,
 
 async function linkArtifact(gi: GoalInvocation,
                             rb: BuildInProgress): Promise<void> {
-    const { configuration, credentials, goalEvent } = gi;
-    const imageUrl = await configuration.sdm.artifactStore.storeFile(rb.appInfo, rb.deploymentUnitFile, credentials);
-    await postLinkImageWebhook(
-        goalEvent.repo.owner,
-        goalEvent.repo.name,
-        goalEvent.sha,
-        imageUrl,
-        gi.context.workspaceId);
+    throw new Error("Artifact concept deprecated. Use project listeners to store artifacts after goals.");
 }
 
 function updateBuildStatus(status: "started" | "failed" | "error" | "passed" | "canceled",

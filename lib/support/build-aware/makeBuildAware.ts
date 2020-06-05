@@ -15,14 +15,11 @@
  */
 
 import {
-    EditMode,
-    editModes,
-} from "@atomist/automation-client";
-import {
     CodeTransformRegistration,
-    CodeTransformRegistrationDecorator,
-    TransformModeSuggestion,
-} from "@atomist/sdm";
+    CodeTransformRegistrationDecorator
+} from "@atomist/sdm/lib/api/registration/CodeTransformRegistration";
+import {EditMode, isPullRequest} from "@atomist/automation-client/lib/operations/edit/editModes";
+import {TransformModeSuggestion} from "@atomist/sdm/lib/api/command/target/TransformModeSuggestion";
 
 export const BuildAwareMarker = "[atomist:build-aware]";
 
@@ -66,7 +63,7 @@ export const makeBuildAware: CodeTransformRegistrationDecorator<any> =
 function dryRunOf(em: EditMode): EditMode {
     // Add dry run message suffix
     em.message = dryRunMessage(em.message) + "\n\n" + BuildAwareMarker;
-    if (editModes.isPullRequest(em)) {
+    if (isPullRequest(em)) {
         // Don't let it raise a PR if it wanted to.
         // It will remain a valid BranchCommit if it was a PR
         em.title = em.body = undefined;
