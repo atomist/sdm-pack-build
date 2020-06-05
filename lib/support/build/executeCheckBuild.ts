@@ -14,22 +14,16 @@
  * limitations under the License.
  */
 
-import {
-    HandlerContext,
-    QueryNoCacheOptions,
-} from "@atomist/automation-client";
-import {
-    descriptionFromState,
-    ExecuteGoal,
-    Goal,
-    GoalInvocation,
-    SdmGoalEvent,
-    updateGoal,
-} from "@atomist/sdm";
+import {HandlerContext} from "@atomist/automation-client/lib/HandlerContext";
+import {QueryNoCacheOptions} from "@atomist/automation-client/lib/spi/graph/GraphClient";
+import {descriptionFromState, updateGoal} from "@atomist/sdm/lib/api-helper/goal/storeGoals";
+import {Goal} from "@atomist/sdm/lib/api/goal/Goal";
+import {ExecuteGoal, GoalInvocation} from "@atomist/sdm/lib/api/goal/GoalInvocation";
+import {SdmGoalEvent} from "@atomist/sdm/lib/api/goal/SdmGoalEvent";
+import {BuildStatus} from "@atomist/sdm/lib/typings/types";
 import * as _ from "lodash";
 import {
     BuildForCommit,
-    BuildStatus,
     SdmGoalState,
 } from "../../typings/types";
 

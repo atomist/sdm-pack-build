@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+import {metadata} from "@atomist/sdm/lib/api-helper/misc/extensionPack";
+import {GitHubIssueRouter} from "@atomist/sdm/lib/api-helper/misc/git/GitHubIssueRouter";
+import {ExtensionPack} from "@atomist/sdm/lib/api/machine/ExtensionPack";
+import {IssueCreationOptions} from "@atomist/sdm/lib/spi/issue/IssueCreationOptions";
 import { Build } from "./Build";
 import { buildAwareBuildListener } from "./support/build-aware/buildAwareBuildListener";
-import {IssueCreationOptions} from "@atomist/sdm/lib/spi/issue/IssueCreationOptions";
-import {metadata} from "@atomist/sdm/lib/api-helper/misc/extensionPack";
-import {ExtensionPack} from "@atomist/sdm/lib/api/machine/ExtensionPack";
-import {GitHubIssueRouter} from "@atomist/sdm/lib/api-helper/misc/git/GitHubIssueRouter";
 
 export interface BuildAwareTransformOptions {
     buildGoal: Build | Build[];

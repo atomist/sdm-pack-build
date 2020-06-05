@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {
-    CodeTransformRegistration,
-    CodeTransformRegistrationDecorator
-} from "@atomist/sdm/lib/api/registration/CodeTransformRegistration";
 import {EditMode, isPullRequest} from "@atomist/automation-client/lib/operations/edit/editModes";
 import {TransformModeSuggestion} from "@atomist/sdm/lib/api/command/target/TransformModeSuggestion";
+import {
+    CodeTransformRegistration,
+    CodeTransformRegistrationDecorator,
+} from "@atomist/sdm/lib/api/registration/CodeTransformRegistration";
 
 export const BuildAwareMarker = "[atomist:build-aware]";
 

@@ -14,6 +14,25 @@
  * limitations under the License.
  */
 
+import {subscription} from "@atomist/automation-client/lib/graph/graphQL";
+import {EventFired} from "@atomist/automation-client/lib/HandleEvent";
+import {HandlerContext} from "@atomist/automation-client/lib/HandlerContext";
+import {HandlerResult, Success} from "@atomist/automation-client/lib/HandlerResult";
+import {generateHash} from "@atomist/automation-client/lib/internal/util/string";
+import {findSdmGoalOnCommit} from "@atomist/sdm/lib/api-helper/goal/fetchGoalsOnCommit";
+import {resolveCredentialsPromise} from "@atomist/sdm/lib/api-helper/machine/handlerRegistrations";
+import {AddressChannels, addressChannelsFor} from "@atomist/sdm/lib/api/context/addressChannels";
+import {Goal} from "@atomist/sdm/lib/api/goal/Goal";
+import {DefaultGoalNameGenerator} from "@atomist/sdm/lib/api/goal/GoalNameGenerator";
+import {
+    FulfillableGoalDetails, FulfillableGoalWithRegistrationsAndListeners,
+    getGoalDefinitionFrom, Implementation,
+    ImplementationRegistration,
+} from "@atomist/sdm/lib/api/goal/GoalWithFulfillment";
+import {IndependentOfEnvironment} from "@atomist/sdm/lib/api/goal/support/environment";
+import {BuildListener, BuildListenerInvocation} from "@atomist/sdm/lib/api/listener/BuildListener";
+import {SoftwareDeliveryMachine} from "@atomist/sdm/lib/api/machine/SoftwareDeliveryMachine";
+import {OnBuildComplete} from "@atomist/sdm/lib/typings/types";
 import {
     Builder,
     executeBuild,
@@ -22,25 +41,6 @@ import {
     executeCheckBuild,
     setBuildContext,
 } from "./support/build/executeCheckBuild";
-import {
-    FulfillableGoalDetails, FulfillableGoalWithRegistrationsAndListeners,
-    getGoalDefinitionFrom, Implementation,
-    ImplementationRegistration
-} from "@atomist/sdm/lib/api/goal/GoalWithFulfillment";
-import {resolveCredentialsPromise} from "@atomist/sdm/lib/api-helper/machine/handlerRegistrations";
-import {BuildListener, BuildListenerInvocation} from "@atomist/sdm/lib/api/listener/BuildListener";
-import {HandlerContext} from "@atomist/automation-client/lib/HandlerContext";
-import {SoftwareDeliveryMachine} from "@atomist/sdm/lib/api/machine/SoftwareDeliveryMachine";
-import {DefaultGoalNameGenerator} from "@atomist/sdm/lib/api/goal/GoalNameGenerator";
-import {HandlerResult, Success} from "@atomist/automation-client/lib/HandlerResult";
-import {generateHash} from "@atomist/automation-client/lib/internal/util/string";
-import {EventFired} from "@atomist/automation-client/lib/HandleEvent";
-import {AddressChannels, addressChannelsFor} from "@atomist/sdm/lib/api/context/addressChannels";
-import {Goal} from "@atomist/sdm/lib/api/goal/Goal";
-import {OnBuildComplete} from "@atomist/sdm/lib/typings/types";
-import {findSdmGoalOnCommit} from "@atomist/sdm/lib/api-helper/goal/fetchGoalsOnCommit";
-import {IndependentOfEnvironment} from "@atomist/sdm/lib/api/goal/support/environment";
-import {subscription} from "@atomist/automation-client/lib/graph/graphQL";
 
 /**
  * Register a Builder for a certain type of push
@@ -137,6 +137,7 @@ export class Build
         if (!sdmGoal) {
             return Success;
         }
+        // TODO: Do we need to account for this in 2.0?
         // if (build.provider === "sdm") {
         //     return Success;
         // }

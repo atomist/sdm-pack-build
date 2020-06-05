@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
+import {GitProject} from "@atomist/automation-client/lib/project/git/GitProject";
+import {Project} from "@atomist/automation-client/lib/project/Project";
+import {logger} from "@atomist/automation-client/lib/util/logger";
+import {ErrorFinder, spawnLog, SpawnLogOptions, SpawnLogResult} from "@atomist/sdm/lib/api-helper/misc/child_process";
+import {serializeResult} from "@atomist/sdm/lib/api-helper/misc/result";
+import {InterpretLog} from "@atomist/sdm/lib/spi/log/InterpretedLog";
 import { SpawnOptions } from "child_process";
 import * as _ from "lodash";
+import { AppInfo } from "./AppInfo";
 import {
     Builder,
     BuildInProgress,
 } from "./executeBuild";
-import {Project} from "@atomist/automation-client/lib/project/Project";
-import {InterpretLog} from "@atomist/sdm/lib/spi/log/InterpretedLog";
-import {GitProject} from "@atomist/automation-client/lib/project/git/GitProject";
-import {ErrorFinder, spawnLog, SpawnLogOptions, SpawnLogResult} from "@atomist/sdm/lib/api-helper/misc/child_process";
-import {logger} from "@atomist/automation-client/lib/util/logger";
-import {serializeResult} from "@atomist/sdm/lib/api-helper/misc/result";
-import { AppInfo } from "./AppInfo";
 
 export interface SpawnBuilderOptions {
 
